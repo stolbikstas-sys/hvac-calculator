@@ -1,0 +1,3840 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>РАСЧЁТ МУЛЬТИ СПЛИТ - СИСТЕМ</title>
+  <style>
+    :root {
+      --brand-color: #3498db;
+      --brand-color-hover: #2980b9;
+      --brand-bg-light: #ebf8ff;
+    }
+
+body { 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  max-width: 1200px;
+  margin: 30px auto; 
+  padding: 0 20px; 
+  color: #2d3748; 
+  line-height: 1.6; 
+  transition: background-color 0.3s;
+  
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(circle at 1px 1px, #cbd5e0 1px, transparent 0);
+  background-size: 48px 48px;
+  background-repeat: repeat;
+}
+
+    h2 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
+    
+    .brand-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      max-width: 600px;
+      margin: 15px auto 25px;
+    }
+    .brand-btn {
+      padding: 12px 24px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: #4a5568;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+.brand-btn:hover {
+  border-color: #cbd5e0;
+  color: #2d3748;
+  background: #f7fafc;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+.brand-btn:hover:not(.active) {
+  border-color: #a0aec0;
+}
+.brand-btn.active {
+  background: linear-gradient(135deg, var(--brand-color) 0%, var(--brand-color-hover) 100%);
+  border-color: var(--brand-color);
+  color: white;
+  box-shadow: 0 6px 20px rgba(44, 82, 130, 0.3);
+  transform: translateY(-2px);
+}
+
+.brand-btn.active:hover {
+  box-shadow: 0 8px 25px rgba(44, 82, 130, 0.4);
+  transform: translateY(-3px);
+}
+    .apartment { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px 0; }
+    .room { 
+      border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; text-align: center; 
+      cursor: pointer; transition: all 0.25s ease; background: white; font-weight: 600; color: #4a5568;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .room:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: #cbd5e0; }
+    .room.active { background: var(--brand-bg-light); border-color: var(--brand-color); color: var(--brand-color); box-shadow: 0 0 0 1px var(--brand-color); }
+    .room.inactive { opacity: 0.4; pointer-events: none; background: #f7fafc; border-color: #edf2f7; }
+    .room.filled { border-color: #38a169; color: #2f855a; background: #f0fff4; box-shadow: 0 0 0 1px #38a169; }
+
+        .inputs { display: none; margin: 25px 0; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); border-left: 4px solid var(--brand-color); }
+    .inputs h3 { 
+      font-size: 20px; 
+      font-weight: 600; 
+      color: #2d3748; 
+      margin-bottom: 25px; 
+      padding-bottom: 15px; 
+      border-bottom: 2px solid #e2e8f0;
+      letter-spacing: 0.3px;
+    }
+    .inputs.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin: 15px 0; align-items: center; padding: 8px 0; border-bottom: 1px solid #f7fafc; }
+    .form-row:last-child { border-bottom: none; }
+    label { min-width: 180px; font-weight: 600; color: #4a5568; font-size: 14px; letter-spacing: 0.2px; }
+    input, select { padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 6px; flex-grow: 1; max-width: 200px; font-size: 14px; transition: all 0.2s ease; background: #fff; }
+    input:focus, select:focus { outline: none; border-color: var(--brand-color); }
+
+    button { 
+      background: #27ae60; color: white; border: none; padding: 12px 24px; 
+      border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 15px; 
+      transition: background 0.2s; width: 100%; max-width: 300px;
+    }
+    button:hover { background: #219653; }
+    
+    button.calc-btn { 
+      background: var(--brand-color); color: white; width: 100%; max-width: 400px; font-size: 15px; padding: 16px;
+      border-radius: 8px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+      box-shadow: 0 4px 14px rgba(44, 82, 130, 0.2); transition: all 0.25s ease; border: none;
+    }
+    button.calc-btn.waiting { background: #a0aec0; cursor: not-allowed; box-shadow: none; }
+    button.calc-btn.ready { 
+      background: var(--brand-color); 
+      cursor: pointer; 
+      box-shadow: 0 4px 14px rgba(44, 82, 130, 0.25); 
+    }
+    button.calc-btn.ready:hover { background: var(--brand-color-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(44, 82, 130, 0.3); }
+
+    #result { margin-top: 30px; padding: 25px; background: white; border-radius: 8px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    #result.active { display: block; }
+    
+    .result-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 20px 0; font-size: 14px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+    .result-table th, .result-table td { border-bottom: 1px solid #edf2f7; padding: 12px; text-align: left; white-space: nowrap;}
+    .result-table th { border-bottom: 2px solid #e2e8f0; white-space: nowrap; font-size: 14px; padding: 10px 6px; }
+    .result-table tr:nth-child(even) { background: #fafbfc; }
+    .result-table tr:hover { background: #f7fafc; }
+    .result-table tr:last-child td { border-bottom: none; }
+    
+    .hc-code { font-family: 'SF Mono', Monaco, monospace; background: #f7fafc; padding: 3px 8px; border-radius: 4px; font-size: 12px; color: #4a5568; border: 1px solid #e2e8f0; letter-spacing: 0.5px; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size:11px; font-weight: 600; margin-right: 5px; letter-spacing: 0.3px; text-transform: uppercase; white-space: nowrap; }
+    .badge-type { background: #edf2f7; color: #2d3748; border: 1px solid #e2e8f0; }
+    .badge-line { background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
+    .badge-brand { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+    
+    .settings-panel {
+      text-align: center; margin: 25px 0; background: #fff; padding: 20px; 
+      border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #edf2f7;
+    }
+    .settings-panel label { font-weight: 600; color: #2c3e50; }
+    .settings-panel input { width: 80px; margin: 0 10px; text-align: center; }
+    .hint { font-size: 12px; color: #718096; margin-top: 8px; display: block; font-style: italic; letter-spacing: 0.2px; }
+
+    .form-row.hidden { display: none; }
+
+.room-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 30px;
+  align-items: start;
+  position: relative;
+}
+
+.unit-image-box {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+    .unit-image-box img {
+      max-width: 100%;
+      max-height: 250px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .unit-placeholder {
+      color: #a0aec0;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      padding: 40px 20px;
+    }
+
+    @media (max-width: 600px) {
+      .apartment { grid-template-columns: repeat(3, 1fr); }
+      .room-form-grid { grid-template-columns: 1fr; }
+      .form-row { flex-direction: column; align-items: stretch; }
+      label { min-width: auto; margin-bottom: 5px; }
+      input, select { max-width: 100%; }
+      .brand-tabs { grid-template-columns: 1fr; max-width: 300px; }
+      .brand-btn { text-align: center; }
+    }
+    @media (max-width: 900px) {
+      .unit-image-box { position: static; margin-top: 20px; }
+    }
+
+.header-with-logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  padding: 25px 35px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  border-top: 4px solid var(--brand-color);
+  overflow: hidden;
+}
+
+.header-with-logo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--brand-color) 0%, var(--brand-color-hover) 100%);
+}
+
+.header-logo {
+  max-height: 45px;
+  max-width: 140px;
+  object-fit: contain;
+  transition: all 0.3s ease;
+  opacity: 0.9;
+  flex-shrink: 0;
+  margin-left: 20px;
+}
+
+.header-logo:hover {
+  transform: scale(1.05);
+  opacity: 1;
+}
+
+.header-with-logo h2 {
+  margin: 0;
+  text-align: center;
+  flex-grow: 1;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a202c;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.header-subtitle {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #718096;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+@media (max-width: 768px) {
+  .header-with-logo {
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 15px;
+  }
+
+  .header-with-logo h2 {
+    font-size: 16px;
+    letter-spacing: 0.8px;
+  }
+  
+  .header-subtitle {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  
+  .header-logo {
+    max-height: 35px;
+    max-width: 100px;
+    margin-left: 0;
+  }
+
+  .unit-image-box {
+    position: static;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .room-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .brand-tabs {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    max-width: 100%;
+    margin: 15px auto 20px;
+  }
+  
+  .brand-btn {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  .apartment {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 15px 0;
+  }
+  
+  .room {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+  
+  .room-form-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .unit-image-box {
+    position: static;
+    margin-top: 20px;
+    order: -1;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin: 12px 0;
+    padding: 10px 0;
+  }
+  
+  label {
+    min-width: auto;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  
+  input, select {
+    max-width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+  
+  .inputs button[onclick="saveRoomData()"] {
+    width: 100%;
+    max-width: 100%;
+    padding: 14px;
+    font-size: 14px;
+  }
+  
+  .settings-panel {
+    padding: 18px 15px;
+    margin: 20px 0;
+  }
+  
+  .settings-panel label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .settings-panel input {
+    width: 80px;
+    margin: 0 10px;
+  }
+  
+  .hint {
+    display: block;
+    margin-top: 10px;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  
+  button.calc-btn {
+    font-size: 14px;
+    padding: 14px;
+    max-width: 100%;
+  }
+  
+  .result-table {
+    font-size: 12px;
+    margin: 15px 0;
+  }
+  
+  .result-table th,
+  .result-table td {
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+  
+  .result-table th {
+    font-size: 10px;
+    padding: 10px 6px;
+  }
+  
+  .badge {
+    display: block;
+    margin: 2px 0;
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  
+  .hc-code {
+    font-size: 10px;
+    padding: 2px 5px;
+  }
+  
+  .price-cell {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  
+  .total-price {
+    font-size: 15px;
+    padding: 15px;
+  }
+  
+  .spec-table {
+    font-size: 11px;
+  }
+  
+  .spec-table th,
+  .spec-table td {
+    padding: 8px 5px;
+  }
+  
+  .spec-summary {
+    padding: 18px 15px;
+  }
+  
+  .spec-summary-row {
+    font-size: 14px;
+  }
+  
+  .spec-summary-row.total-sum {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 15px 10px;
+    margin: 15px auto;
+  }
+  
+  .apartment {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  
+  .room {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+  
+  .inputs {
+    padding: 20px 15px;
+    margin: 20px 0;
+  }
+  
+  .result-table {
+    font-size: 11px;
+  }
+  
+  .result-table th,
+  .result-table td {
+    padding: 6px 4px;
+  }
+  
+  button, .brand-btn {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 768px) {
+  #result {
+    padding: 20px 10px;
+  }
+  
+  .result-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .spec-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.brand-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.brand-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  border-color: var(--brand-color);
+}
+
+.brand-btn:active {
+  transform: translateY(-1px);
+}
+
+.brand-btn.active {
+  background: linear-gradient(135deg, var(--brand-color) 0%, var(--brand-color-hover) 100%);
+  border-color: var(--brand-color);
+  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+  transform: translateY(-2px);
+}
+
+.inputs button[onclick="saveRoomData()"] {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 13px;
+  padding: 14px 30px;
+  box-shadow: 0 4px 12px rgba(45, 55, 72, 0.25);
+  transition: all 0.25s ease;
+  margin-top: 25px;
+}
+.inputs button[onclick="saveRoomData()"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(45, 55, 72, 0.35);
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+}
+.inputs button[onclick="saveRoomData()"]:active {
+  transform: translateY(0);
+}
+
+button[onclick="renderRooms()"] {
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3);
+}
+
+button[onclick="renderRooms()"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(52, 152, 219, 0.45);
+}
+
+button.calc-btn.ready {
+  background: linear-gradient(135deg, var(--brand-color) 0%, var(--brand-color-hover) 100%);
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+button.calc-btn.ready:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.5);
+  background: linear-gradient(135deg, var(--brand-color-hover) 0%, var(--brand-color) 100%);
+}
+
+.room {
+  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+}
+
+.room:hover:not(.inactive) {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.room.filled {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-color: #27ae60;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+}
+
+.room.active {
+  background: linear-gradient(135deg, var(--brand-bg-light) 0%, #d6eaf8 100%);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.25);
+}
+
+input, select {
+  border-radius: 6px;
+  border: 1.5px solid #e0e0e0;
+  background: #fafbfc;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+input:focus, select:focus {
+  border-color: var(--brand-color);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.12);
+  outline: none;
+}
+
+.inputs {
+  border-radius: 12px;
+  border-left: 5px solid var(--brand-color);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+.settings-panel {
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  border: 1px solid #e8ecef;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.price-cell {
+  font-weight: 600;
+  color: #27ae60;
+  background: #e8f5e9;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.total-price {
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  padding: 20px 25px;
+  border-radius: 12px;
+  margin-top: 25px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(30, 60, 114, 0.3);
+}
+
+.total-price small {
+  font-weight: 400;
+  opacity: 0.9;
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+#priceStatus {
+  display: inline-block;
+}
+
+#loadPricesBtn {
+  background: white;
+  color: #2d3748;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+  width: auto;
+  margin-left: 15px;
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#loadPricesBtn:hover {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-color: var(--brand-color);
+  color: var(--brand-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+#loadPricesBtn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .result-table {
+    font-size: 12px;
+  }
+  
+  .result-table th,
+  .result-table td {
+    padding: 8px 5px;
+    white-space: normal;
+  }
+  
+  .result-table th {
+    font-size: 11px;
+  }
+  
+  .result-table:first-of-type {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .result-table:last-of-type {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .hc-code {
+    font-size: 10px;
+  }
+  
+  .badge {
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+  
+  .price-cell {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  
+  .total-price {
+    font-size: 16px;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .result-table {
+    font-size: 11px;
+  }
+  
+  .result-table th {
+    font-size: 10px;
+  }
+  
+  .badge {
+    display: block;
+    margin: 2px 0;
+  }
+}
+
+#specificationTable {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.spec-table {
+  width: 100% !important;
+  max-width: none !important;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 13px;
+  background: white;
+  border: 2px solid #2c3e50;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  table-layout: fixed !important;
+}
+
+.spec-table th,
+.spec-table td {
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.spec-table th {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.spec-table td {
+  border-bottom: 1px solid #e0e0e0;
+  color: #2c3e50;
+}
+
+.spec-table tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.spec-table .number {
+  width: 5%;
+  text-align: center;
+  font-weight: 700;
+  color: #7f8c8d;
+}
+
+.spec-table .name {
+  width: 45%;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.spec-table .name small {
+  color: #95a5a6;
+  font-weight: 400;
+  font-size: 11px;
+  display: block;
+  margin-top: 4px;
+}
+
+.spec-table .price {
+  width: 20%;
+  text-align: right;
+  font-weight: 600;
+  color: #2c3e50;
+  white-space: nowrap;
+}
+
+.spec-table .qty {
+  width: 15%;
+  text-align: center;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.spec-table .total {
+  width: 15%;
+  text-align: right;
+  font-weight: 700;
+  color: #1e3c72;
+  white-space: nowrap;
+}
+
+.spec-summary {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  color: white;
+  padding: 25px 30px;
+  border-radius: 10px;
+  margin-top: 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.spec-summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.spec-summary-row:last-child {
+  border-bottom: none;
+}
+
+.spec-summary-row.total-sum {
+  font-size: 22px;
+  font-weight: bold;
+  padding-top: 15px;
+  margin-top: 5px;
+  border-top: 2px solid rgba(255,255,255,0.3);
+  border-bottom: none;
+}
+
+.spec-summary-row.vat {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.spec-summary-row.info {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  * {
+    box-sizing: border-box !important;
+  }
+
+  body {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    font-size: 11pt !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .brand-tabs, .settings-panel, button, #roomInputs, #apartment,
+  .header-with-logo, footer, #loadPricesBtn, #priceStatus, #exportPdfBtn {
+    display: none !important;
+  }
+
+  #result, #specificationBlock {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  #specificationTable {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #specificationTable > div {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .spec-table {
+    width: 100% !important;
+    max-width: none !important;
+    display: table !important;
+    border-collapse: collapse !important;
+    border: 2px solid #000 !important;
+    font-size: 10pt !important;
+    table-layout: fixed !important;
+    page-break-inside: avoid !important;
+  }
+
+  .spec-table th, .spec-table td {
+    padding: 6px !important;
+    border: 1px solid #000 !important;
+    word-wrap: break-word !important;
+    overflow: hidden !important;
+  }
+
+  .spec-summary {
+    background: #2d3748 !important;
+    color: white !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 15px !important;
+    margin-top: 10px !important;
+    page-break-inside: avoid !important;
+    box-sizing: border-box !important;
+  }
+
+  h2, h3, h4 {
+    page-break-after: avoid !important;
+    color: #000 !important;
+  }
+
+  table {
+    page-break-inside: avoid !important;
+  }
+}
+
+.features-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 20px;
+  cursor: help;
+  box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.features-icon span {
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.features-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(30, 60, 114, 0.5);
+  background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+}
+
+.features-tooltip {
+  position: absolute;
+  top: 0;
+  left: 45px;
+  background: white;
+  border: 2px solid #1e3c72;
+  border-radius: 8px;
+  padding: 15px;
+  min-width: 280px;
+  max-width: 320px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.features-icon:hover .features-tooltip {
+  opacity: 1;
+  visibility: visible;
+  left: 50px;
+}
+
+.tooltip-title {
+  font-weight: 700;
+  color: #1e3c72;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 8px;
+}
+
+.features-tooltip ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-tooltip li {
+  padding: 6px 0;
+  font-size: 13px;
+  color: #2c3e50;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.features-tooltip li:last-child {
+  border-bottom: none;
+}
+
+.features-tooltip li:hover {
+  background: #f8f9fa;
+  padding-left: 5px;
+  transition: all 0.2s;
+}
+
+@media (max-width: 768px) {
+  .features-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    top: 10px;
+    right: 10px;
+  }
+  
+  .features-tooltip {
+    right: -50px;
+    left: auto;
+    min-width: 200px;
+    max-width: 250px;
+  }
+  
+  .features-icon:hover .features-tooltip {
+    right: -45px;
+    left: auto;
+  }
+}
+
+    #result h4 {
+      color: #2d3748;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 30px 0 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      letter-spacing: 0.3px;
+    }
+
+.result-table-wrapper,
+.spec-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 15px 0;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.result-table-wrapper::-webkit-scrollbar,
+.spec-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.result-table-wrapper::-webkit-scrollbar-track,
+.spec-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.result-table-wrapper::-webkit-scrollbar-thumb,
+.spec-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+.result-table-wrapper::-webkit-scrollbar-thumb:hover,
+.spec-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+@media (max-width: 768px) {
+  #specificationBlock {
+    padding: 20px 10px !important;
+    margin-top: 20px;
+    border-radius: 10px;
+  }
+  
+  .spec-table {
+    font-size: 11px;
+    margin: 15px 0;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .spec-table th {
+    padding: 10px 6px;
+    font-size: 10px;
+  }
+  
+  .spec-table td {
+    padding: 10px 6px;
+  }
+  
+  .spec-table .number {
+    width: 35px;
+    font-size: 13px;
+  }
+  
+  .spec-table .name {
+    font-size: 11px;
+  }
+  
+  .spec-table .name small {
+    font-size: 9px;
+  }
+  
+  .spec-table .price,
+  .spec-table .qty,
+  .spec-table .total {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  
+  #specificationBlock button {
+    padding: 12px 16px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+  
+  #specificationBlock select {
+    padding: 10px 12px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  
+  .spec-summary {
+    padding: 18px 15px;
+    margin-top: 15px;
+  }
+  
+  .spec-summary-row {
+    font-size: 14px;
+    padding: 8px 0;
+  }
+  
+  .spec-summary-row.total-sum {
+    font-size: 16px;
+    padding-top: 12px;
+  }
+  
+  .spec-summary-row.vat {
+    font-size: 12px;
+  }
+  
+  .spec-summary-row.info {
+    font-size: 11px;
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .spec-table {
+    font-size: 11px;
+  }
+  
+  .spec-table th,
+  .spec-table td {
+    padding: 8px 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  #specificationBlock {
+    padding: 15px 8px !important;
+  }
+  
+  .spec-table {
+    font-size: 10px;
+  }
+  
+  .spec-table th {
+    padding: 8px 4px;
+    font-size: 9px;
+  }
+  
+  .spec-table td {
+    padding: 8px 4px;
+  }
+  
+  .spec-table .name {
+    font-size: 10px;
+  }
+  
+  .spec-table .name small {
+    display: block;
+    margin-top: 3px;
+  }
+  
+  .spec-summary {
+    padding: 15px 12px;
+  }
+  
+  .spec-summary-row.total-sum {
+    font-size: 15px;
+  }
+  
+  #specificationBlock > div > div {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  #specificationBlock select,
+  #specificationBlock button {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  margin: 15px 0;
+}
+
+.table-responsive table {
+  min-width: 100%;
+}
+
+input.error, select.error {
+  border-color: #e53e3e !important;
+  background: #fff5f5 !important;
+  box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.2);
+}
+
+input.error:focus, select.error:focus {
+  border-color: #c53030 !important;
+}
+
+#historyPanel {
+  border-left: 4px solid #2d3748 !important;
+  padding: 20px 25px !important;
+}
+
+#historyPanel h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px !important;
+  padding-bottom: 15px !important;
+}
+
+#historyPanel h3 span {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  margin: 10px 0;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #2d3748;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.history-item:hover {
+  background: #fafbfc;
+  border-color: #cbd5e0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.history-info {
+  flex-grow: 1;
+  cursor: pointer;
+}
+
+.history-info .history-title {
+  font-weight: 600;
+  color: #1a202c;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.history-info .history-details {
+  font-size: 12px;
+  color: #718096;
+}
+
+.history-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.history-btn {
+  padding: 8px 16px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+  background: white;
+  color: #2d3748;
+}
+
+.history-btn:hover {
+  background: #f7fafc;
+  border-color: #a0aec0;
+}
+
+.history-btn-load {
+  border-color: #2d3748;
+  color: #2d3748;
+}
+
+.history-btn-load:hover {
+  background: #2d3748;
+  color: white;
+}
+
+.history-btn-delete {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.history-btn-delete:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+#historyPanel button[onclick="clearAllHistory()"] {
+  background: #fee !important;
+  color: #c0392b !important;
+  border: 1px solid #fcc !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  transition: all 0.2s !important;
+}
+
+#historyPanel button[onclick="clearAllHistory()"]:hover {
+  background: #c0392b !important;
+  color: white !important;
+  border-color: #c0392b !important;
+}
+
+#historyPanel h3 {
+  color: #1a202c !important;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 12px;
+  margin-bottom: 15px;
+}
+
+#historyEmpty {
+  text-align: center;
+  color: #a0aec0;
+  font-style: italic;
+  padding: 30px 20px;
+  font-size: 14px;
+}
+
+.outdoor-specs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  background: white;
+}
+
+.outdoor-specs-table th, 
+.outdoor-specs-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #edf2f7;
+  text-align: left;
+}
+
+.outdoor-specs-table th {
+  background: #f7fafc;
+  width: 55%;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 13px;
+}
+
+.outdoor-specs-table td {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.outdoor-specs-table tr:last-child th,
+.outdoor-specs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.outdoor-specs-table tr:hover th,
+.outdoor-specs-table tr:hover td {
+  background: #fafbfc;
+}
+
+button.calc-btn[onclick="toggleHistoryPanel()"]:hover {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(45, 55, 72, 0.4) !important;
+}
+
+button.calc-btn[onclick="toggleHistoryPanel()"]:active {
+  transform: translateY(0);
+}
+
+/* Адаптивность истории */
+@media (max-width: 768px) {
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .history-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .history-info .history-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+<div class="header-with-logo">
+  <div style="flex: 1;"></div>
+  <div style="text-align: center; flex: 2;">
+    <h2>РАСЧЁТ МУЛЬТИ СПЛИТ - СИСТЕМ</h2>
+    <span class="header-subtitle">Профессиональный подбор оборудования</span>
+  </div>
+  <div style="flex: 1; display: flex; justify-content: flex-end;">
+     <img src="https://raw.githubusercontent.com/stolbikstas-sys/hvac-calculator/refs/heads/main/ballu_logo_2024.svg" alt="Ballu" class="header-logo" id="brandLogo">
+  </div>
+</div>
+  
+  <div class="brand-tabs" id="brandTabs"></div>
+  
+  <div style="text-align: center; margin-bottom: 20px;">
+    <label style="display:inline-block; margin-right: 10px;">Количество комнат (1–5):</label>
+    <input type="number" id="roomCount" min="1" max="5" value="2" style="width: 60px; display:inline-block;">
+    <button onclick="renderRooms()" style="width: auto; margin-top:0; padding: 8px 15px; background: var(--brand-color); color: white; border:none; border-radius:4px; cursor:pointer;">Применить</button>
+  </div>
+
+  <div class="apartment" id="apartment"></div>
+
+  <div class="inputs" id="roomInputs">
+    <h3 style="margin-top:0;">Параметры комнаты <span id="currentRoomNum" style="color:var(--brand-color)"></span></h3>
+    
+    <div class="room-form-grid">
+  <div class="features-icon" id="featuresIcon" style="display: none;">
+    <span>?</span>
+    <div class="features-tooltip" id="featuresTooltip">
+      <div class="tooltip-title">Преимущества модели:</div>
+      <ul id="featuresList"></ul>
+    </div>
+    </div>
+      <div>
+        <div class="form-row">
+          <label>Тип внутреннего блока:</label>
+          <select id="unitType" onchange="toggleSeriesField(); updateUnitImage()"></select>
+        </div>
+        
+        <div class="form-row" id="seriesRow">
+          <label>Линейка:</label>
+          <select id="unitLine" onchange="updateUnitImage()"></select>
+        </div>
+
+        <div class="form-row">
+          <label>Площадь, м²:</label>
+          <input type="number" id="area" min="1" value="15">
+        </div>
+        <div class="form-row">
+          <label>Высота потолков, м:</label>
+          <input type="number" id="height" min="2.2" step="0.1" value="2.7">
+        </div>
+        
+        <div class="form-row">
+          <label>Инсоляция (солнце):</label>
+          <select id="insolation">
+            <option value="30">Север / Тень (30 Вт/м³)</option>
+            <option value="35" selected>Стандарт (35 Вт/м³)</option>
+            <option value="40">Юг / Панорама (40 Вт/м³)</option>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <label>Люди / активность:</label>
+          <select id="peopleType">
+            <option value="0">Нет людей</option>
+            <option value="120" selected>Отдых, сидя (120 Вт)</option>
+            <option value="140">Офисная работа (140 Вт)</option>
+            <option value="290">Производство (290 Вт)</option>
+          </select>
+          <input type="number" id="peopleCount" min="0" value="1" style="width:70px; flex-grow:0;"> чел.
+        </div>
+        
+        <div class="form-row">
+          <label>Техника:</label>
+          <select id="equipType">
+            <option value="0">Нет техники</option>
+            <option value="300" selected>Компьютер (300 Вт)</option>
+            <option value="550">Копировальный аппарат (550 Вт)</option>
+            <option value="300">Кофеварка (300 Вт)</option>
+          </select>
+          <input type="number" id="equipCount" min="0" value="1" style="width:70px; flex-grow:0;"> шт.
+        </div>
+
+        <div class="form-row">
+          <label>Запас мощности:</label>
+          <input type="number" id="margin" min="0" max="50" value="0"> %
+        </div>
+        
+        <button onclick="saveRoomData()">Сохранить</button>
+      </div>
+      
+<div class="unit-image-box">
+  <img id="unitImage" src="" alt="Блок">
+  <div id="unitPlaceholder" class="unit-placeholder">Выберите тип блока</div>
+</div>
+    </div>
+ </div>
+
+  <div class="settings-panel">
+    <label>Допустимая сумма внутренних блоков (% от мощности наружного):</label>
+    <input type="number" id="diversityFactor" min="80" max="130" value="125"> %
+    <span class="hint">100% = наружный равен сумме внутренних • 125% = наружный может быть меньше • 130% = максимальная экономия</span>
+  </div>
+
+<div class="settings-panel">
+  <button onclick="loadPrices()" id="loadPricesBtn" style="width: auto;">Загрузить прайс</button>
+  <span id="priceStatus" style="margin-left: 15px; font-size: 13px; color: #27ae60; font-weight: 600;"></span>
+</div>
+
+<div style="text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+  <button onclick="calculateSystem()" id="calcBtn" class="calc-btn waiting">Рассчитать систему</button>
+  <button onclick="toggleHistoryPanel()" class="calc-btn" style="background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%); max-width: 250px;">История расчётов</button>
+</div>
+
+<div id="historyPanel" style="display: none; margin-top: 25px; padding: 25px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #2d3748;">
+  <h3 style="color: #2c3e50; margin-top: 0; display: flex; justify-content: space-between; align-items: center;">
+    <span>История расчётов</span>
+    <button onclick="clearAllHistory()" style="background: #991b1b; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; max-width: none; margin: 0; transition: all 0.2s;">Очистить всё</button>
+  </h3>
+  <div id="historyList" style="max-height: 400px; overflow-y: auto;"></div>
+  <p id="historyEmpty" style="text-align: center; color: #95a5a6; padding: 20px;">История пуста. Сделайте первый расчёт!</p>
+</div>
+
+  <div id="result">
+    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 10px;">Результат подбора</h3>
+    <div id="summary"></div>
+    
+    <div id="specificationBlock" style="display: none; margin-top: 30px;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h3 style="color: #2c3e50; margin-bottom: 15px;">Спецификация оборудования</h3>
+<div style="text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+  <button onclick="generateSpecification()" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3); transition: all 0.3s;">
+    Сформировать спецификацию
+  </button>
+  <button onclick="exportToPDF()" style="background: linear-gradient(135deg, #E31E24 0%, #C4181D 100%); color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(227, 30, 36, 0.3); transition: all 0.3s; display: none;" id="exportPdfBtn">
+    Экспорт в PDF
+  </button>
+</div>
+      </div>
+      
+      <div id="specificationTable" style="display: none; width: 100%; max-width: none !important;"></div>
+    </div>
+  </div>
+
+
+<script>
+// === ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: Получение кода мощности (07, 09, 12, 18, 24) ===
+function getIndoorCode(powerKw) {
+  if (powerKw <= 2.3) return "07";
+  if (powerKw <= 2.8) return "09";
+  if (powerKw <= 3.6) return "12";
+  if (powerKw <= 5.5) return "18"; // Включает 5.0 и 5.3
+  if (powerKw <= 6.5) return "21"; // Electrolux specific
+  return "24"; // 7.0+
+}
+
+// === БАЗЫ ДАННЫХ ПО БРЕНДАМ ===
+const brands = {
+  "ballu-free": {
+    name: "Ballu Free Match (AUX)",
+    color: "#3498db",
+    logo: "https://www.ballu.ru/images/ballu_logo_2024.svg",
+    types: ["Настенный", "Кассетный", "Канальный"],
+    lines: {
+      "Настенный": ["Platinum Evolution", "Evolution Noire", "Defender", "Defender_SV"],
+      "Кассетный": [null],
+      "Канальный": [null]
+    },
+    lineImages: {
+      "Platinum Evolution": "https://rkcdn.ru/products/499b8959-cf4e-11f0-b8e1-00505601218a/src.webp",
+      "Evolution Noire": "https://rkcdn.ru/products/a84803ad-39df-11ef-b8d9-00505601218a/src.webp",
+      "Defender": "https://rkcdn.ru/products/3f377975-f808-11ef-b8de-00505601218a/src.webp",
+      "Defender_SV": "https://rkcdn.ru/products/b6cd28b5-8193-11f0-b8e0-00505601218a/src.webp",
+      "Кассетный": "https://rkcdn.ru/products/29b173ee-b6a1-11ec-b732-005056013a69/src.webp",
+      "Канальный": "https://rkcdn.ru/products/85df70dc-bc4e-11ef-b8dc-00505601218a/src.webp"
+    },
+    // ТАБЛИЦЫ СОВМЕСТИМОСТИ (Ballu Free Match LP)
+    combinations: {
+      "BA2OI-FM/out-14HN8/EU": {
+        1: ["07", "09", "12", "18"],
+        2: ["07+07", "07+09", "07+12", "09+09", "09+12"]
+      },
+      "BA2OI-FM/out-18HN8/EU": {
+        1: ["07", "09", "12", "18"],
+        2: ["07+07", "07+09", "07+12", "07+18", "09+09", "09+12", "09+18", "12+12"]
+      },
+      "BA3OI-FM/out-21HN8/EU": {
+        1: ["18"],
+        2: ["07+07", "07+09", "07+12", "07+18", "09+09", "09+12", "09+18", "12+12", "12+18"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+09+09", "07+09+12", "07+12+12", "09+09+09", "09+09+12"]
+      },
+      "BA3OI-FM/out-27HN8/EU": {
+        1: ["18"],
+        2: ["07+07", "07+09", "07+12", "07+18", "09+09", "09+12", "09+18", "12+12", "12+18", "18+18"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+07+18", "07+09+09", "07+09+12", "07+09+18", "07+12+12", "07+12+18", "09+09+09", "09+09+12", "09+09+18", "09+12+12", "09+12+18", "12+12+12"]
+      },
+      "BA4OI-FM/out-36HN8/EU": {
+        1: ["18", "24"],
+        2: ["07+07", "07+09", "07+12", "07+18", "07+24", "09+09", "09+12", "09+18", "12+12", "12+18", "12+24", "18+18", "18+24", "24+24"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+07+18", "07+07+24", "07+09+09", "07+09+12", "07+09+18", "07+09+24", "07+12+12", "07+12+18", "07+12+24", "07+18+18", "07+18+24", "09+09+09", "09+09+12", "09+09+18", "09+09+24", "09+12+12", "09+12+18", "09+12+24", "09+18+18", "09+18+24", "12+12+12", "12+12+18", "12+12+24", "12+18+18", "12+18+24", "18+18+18"],
+        4: ["07+07+07+07", "07+07+07+09", "07+07+07+12", "07+07+07+18", "07+07+07+24", "07+07+09+09", "07+07+09+12", "07+07+09+09", "07+07+09+12", "07+07+09+18", "07+07+09+24", "07+07+12+12", "07+07+12+18", "07+07+12+24", "07+07+18+18", "07+09+09+09", "07+09+09+12", "07+09+09+18", "07+09+09+24", "07+09+12+12", "07+09+12+18", "07+09+12+24", "07+09+18+18", "07+12+12+12", "07+12+12+18", "09+09+09+09", "09+09+09+12", "09+09+09+18", "09+09+09+24", "09+09+12+12", "09+09+12+18", "09+09+12+24", "09+09+18+18", "09+12+12+12", "09+12+12+18", "12+12+12+12", "12+12+12+18"]
+      },
+      "BA5OI-FM/out-42HN8/EU": {
+        1: ["18", "24"],
+        2: ["07+07", "07+09", "07+12", "07+18", "07+24", "09+09", "09+12", "09+18", "12+12", "12+18", "12+24", "18+18", "18+24", "24+24"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+07+18", "07+07+24", "07+09+09", "07+09+12", "07+09+18", "07+09+24", "07+12+12", "07+12+18", "07+12+24", "07+18+18", "07+18+24", "07+24+24", "09+09+09", "09+09+12", "09+09+18", "09+09+24", "09+12+12", "09+12+18", "09+12+24", "09+18+18", "09+18+24", "09+24+24", "12+12+12", "12+12+18", "12+12+24", "12+18+18", "12+18+24", "12+24+24", "18+18+18", "18+18+24"],
+        4: ["07+07+07+07", "07+07+07+09", "07+07+07+12", "07+07+07+18", "07+07+07+24", "07+07+09+09", "07+07+09+12", "07+07+09+09", "07+07+09+12", "07+07+09+18", "07+07+09+24", "07+07+12+12", "07+07+12+18", "07+07+12+24", "07+07+18+18", "07+07+18+24", "07+07+24+24", "07+09+09+09", "07+09+09+12", "07+09+09+18", "07+09+09+24", "07+09+12+12", "07+09+12+18", "07+09+12+24", "07+09+18+18", "07+09+18+24", "07+12+12+12", "07+12+12+18", "07+12+12+24", "07+12+18+18", "07+12+18+24", "07+18+18+18", "09+09+09+09", "09+09+09+12", "09+09+09+18", "09+09+09+24", "09+09+12+12", "09+09+12+18", "09+09+12+24", "09+09+18+18", "09+09+18+24", "09+12+12+12", "09+12+12+18", "09+12+12+24", "09+12+18+18", "09+12+18+24", "09+18+18+18","12+12+12+12", "12+12+12+18", "12+12+12+24", "12+12+18+18"],
+        5: ["07+07+07+07+07", "07+07+07+07+09", "07+07+07+07+12", "07+07+07+07+18", "07+07+07+07+24", "07+07+07+09+09", "07+07+07+09+12", "07+07+07+09+18", "07+07+07+09+24", "07+07+07+12+12", "07+07+07+12+18", "07+07+07+12+24", "07+07+07+18+18", "07+07+07+18+24", "07+07+09+09+09", "07+07+09+09+12", "07+07+09+09+18", "07+07+09+09+24", "07+07+09+12+12", "07+07+09+12+18", "07+07+09+12+24", "07+07+09+18+18", "07+07+12+12+12", "07+07+12+12+18", "07+07+12+12+24", "07+07+12+18+18", "07+09+09+09+09", "07+09+09+09+18", "07+09+09+09+24", "07+09+09+12+12", "07+09+09+12+18", "07+09+09+12+24", "07+09+09+18+18", "07+09+12+12+12", "07+09+12+12+18", "07+12+12+12+12", "07+12+12+12+18", "09+09+09+09+09", "09+09+09+09+12", "09+09+09+09+18", "09+09+09+09+24", "09+09+09+12+12", "09+09+09+12+18", "09+09+09+12+24", "09+09+09+18+18", "09+09+12+12+12", "09+09+12+12+18", "09+12+12+12+12", "09+12+12+12+18", "12+12+12+12+12"]
+      }
+    },
+    database: {
+outdoor: [
+  { 
+    model: "BA2OI-FM/out-14HN8/EU", 
+    power: 4.1, 
+    minRooms: 1, 
+    maxRooms: 2, 
+    hcCode: "HC-1247854",
+    specs: {
+      cooling: "4,1",
+      heating: "4,8",
+      efficiency: "A++/A+",
+      noise: "53",
+      dimensions: "850×555×300",
+      weight: "30",
+      pipeLenSingle: "25",
+      pipeLenTotal: "40",
+      heightDiff: "15",
+      refrigerant: "R32/1000",
+      tempCool: "-15...+52",
+      tempHeat: "-25...+24"
+    }
+  },
+  { 
+    model: "BA2OI-FM/out-18HN8/EU", 
+    power: 5.3, 
+    minRooms: 1, 
+    maxRooms: 2, 
+    hcCode: "HC-1247884",
+    specs: {
+      cooling: "5,3",
+      heating: "5,6",
+      efficiency: "A++/A++",
+      noise: "54",
+      dimensions: "850×555×300",
+      weight: "30,5",
+      pipeLenSingle: "25",
+      pipeLenTotal: "40",
+      heightDiff: "15",
+      refrigerant: "R32/1030",
+      tempCool: "-15...+52",
+      tempHeat: "-25...+24"
+    }
+  },
+  { 
+    model: "BA3OI-FM/out-21HN8/EU", 
+    power: 6.2, 
+    minRooms: 1, 
+    maxRooms: 3, 
+    hcCode: "HC-1247886",
+    specs: {
+      cooling: "6,2",
+      heating: "6,6",
+      efficiency: "A++/A+",
+      noise: "56",
+      dimensions: "960×700×350",
+      weight: "41,5",
+      pipeLenSingle: "30",
+      pipeLenTotal: "60",
+      heightDiff: "15",
+      refrigerant: "R32/1150",
+      tempCool: "-15...+52",
+      tempHeat: "-25...+24"
+    }
+  },
+  { 
+    model: "BA3OI-FM/out-27HN8/EU", 
+    power: 7.9, 
+    minRooms: 1, 
+    maxRooms: 3, 
+    hcCode: "HC-1247887",
+    specs: {
+      cooling: "7,9",
+      heating: "8,2",
+      efficiency: "A++/A++",
+      noise: "57",
+      dimensions: "960×700×350",
+      weight: "41,5",
+      pipeLenSingle: "30",
+      pipeLenTotal: "60",
+      heightDiff: "15",
+      refrigerant: "R32/1300",
+      tempCool: "-15...+52",
+      tempHeat: "-25...+24"
+    }
+  },
+  { 
+    model: "BA4OI-FM/out-36HN8/EU", 
+    power: 10.5, 
+    minRooms: 1, 
+    maxRooms: 4, 
+    hcCode: "HC-1247889",
+    specs: {
+      cooling: "10,5",
+      heating: "11,0",
+      efficiency: "A++/A+",
+      noise: "60",
+      dimensions: "1045×803×395",
+      weight: "63,5",
+      pipeLenSingle: "35",
+      pipeLenTotal: "80",
+      heightDiff: "15",
+      refrigerant: "R32/2300",
+      tempCool: "-15...+52",
+      tempHeat: "-25...+24"
+    }
+  },
+  { 
+    model: "BA5OI-FM/out-42HN8/EU", 
+    power: 12.0, 
+    minRooms: 1, 
+    maxRooms: 5, 
+    hcCode: "HC-1247891",
+    specs: {
+      cooling: "12,0",
+      heating: "13,0",
+      efficiency: "A++/A+",
+      noise: "61",
+      dimensions: "1000×803×395",
+      weight: "75",
+      pipeLenSingle: "35",
+      pipeLenTotal: "80",
+      heightDiff: "15",
+      refrigerant: "R32/2300",
+      tempCool: "-15...+52",
+      tempHeat: "-25...+24"
+    }
+  }
+],
+
+indoor: [
+  // === Platinum Evolution ===
+  { model: "BSUI-FM/in-07HN8/EU", power: 2.1, type: "Настенный", line: "Platinum Evolution", hcCode: "HC-1247856" },
+  { model: "BSUI-FM/in-09HN8/EU", power: 2.6, type: "Настенный", line: "Platinum Evolution", hcCode: "HC-1247892" },
+  { model: "BSUI-FM/in-12HN8/EU", power: 3.5, type: "Настенный", line: "Platinum Evolution", hcCode: "HC-1247893" },
+  { model: "BSUI-FM/in-18HN8/EU", power: 5.3, type: "Настенный", line: "Platinum Evolution", hcCode: "HC-1247895" },
+  { model: "BSUI-FM/in-24HN8/EU", power: 7.0, type: "Настенный", line: "Platinum Evolution", hcCode: "HC-1247896" },
+  
+  // === Evolution Noire ===
+  
+  { model: "BSUI-FM/in-09HN8/EU_BL", power: 2.6, type: "Настенный", line: "Evolution Noire", hcCode: "HC-1340966" },
+  { model: "BSUI-FM/in-12HN8/EU_BL", power: 3.5, type: "Настенный", line: "Evolution Noire", hcCode: "HC-1340967" },
+  { model: "BSUI-FM/in-18HN8/EU_BL", power: 5.3, type: "Настенный", line: "Evolution Noire", hcCode: "HC-1340968" },
+  
+  // === Defender ===
+  { model: "BSFI-FM/in-07HN8/EU", power: 2.1, type: "Настенный", line: "Defender", hcCode: "HC-1636180" },
+  { model: "BSFI-FM/in-09HN8/EU", power: 2.6, type: "Настенный", line: "Defender", hcCode: "HC-1636183" },
+  { model: "BSFI-FM/in-12HN8/EU", power: 3.5, type: "Настенный", line: "Defender", hcCode: "HC-1636186" },
+  { model: "BSFI-FM/in-18HN8/EU", power: 5.3, type: "Настенный", line: "Defender", hcCode: "HC-1636188" },
+  
+  // === Defender SV (Silver) ===
+  { model: "BSFI-FM/in-07HN8/EU_SV", power: 2.1, type: "Настенный", line: "Defender_SV", hcCode: "HC-1701985" },
+  { model: "BSFI-FM/in-09HN8/EU_SV", power: 2.6, type: "Настенный", line: "Defender_SV", hcCode: "HC-1701986" },
+  { model: "BSFI-FM/in-12HN8/EU_SV", power: 3.5, type: "Настенный", line: "Defender_SV", hcCode: "HC-1701987" },
+  
+  // === Кассетные ===
+  { model: "BACI-FM/in-12HN8/EU", power: 3.52, type: "Кассетный", line: null, hcCode: "HC-1247914" },
+  { model: "BACI-FM/in-18HN8/EU", power: 5.28, type: "Кассетный", line: null, hcCode: "HC-1247916" },
+  
+  // === Канальные ===
+  { model: "BADI-FM/in-07HN8/EU", power: 2.2, type: "Канальный", line: null, hcCode: "HC-1247857" },
+  { model: "BADI-FM/in-09HN8/EU", power: 2.6, type: "Канальный", line: null, hcCode: "HC-1247899" },
+  { model: "BADI-FM/in-12HN8/EU_V2", power: 3.52, type: "Канальный", line: null, hcCode: "HC-1698248" },
+  { model: "BADI-FM/in-18HN8/EU_V2", power: 5.28, type: "Канальный", line: null, hcCode: "HC-1698249" }
+]
+    }
+  },
+  
+  "ballu-smart": {
+    name: "Ballu Multi Smart (Midea)",
+    color: "#3498db",
+    logo: "https://www.ballu.ru/images/ballu_logo_2024.svg",
+    types: ["Настенный"],
+    lines: {"Настенный": ["Boho", "Eco Smart"]},
+    lineImages: {
+      "Boho": "https://rkcdn.ru/products/11798186-4b97-11f0-b8df-00505601218a/src.webp",
+      "Eco Smart": "https://rkcdn.ru/products/1179817c-4b97-11f0-b8df-00505601218a/src.webp"
+    },
+    // ТАБЛИЦЫ СОВМЕСТИМОСТИ (Ballu Multi Smart)
+    combinations: {
+      "BM2OI-FM/out-14HN8_V1/EU": {
+        1: ["09", "12"],
+        2: ["07+07", "07+09", "07+12", "09+09"]
+      },
+      "BM2OI-FM/out-18HN8_V1/EU": {
+        1: ["12", "18"],
+        2: ["07+07", "07+09", "07+12", "07+18", "09+09", "09+12", "09+18", "12+12", "12+18"]
+      },
+      "BM3OI-FM/out-21HN8_V1/EU": {
+        1: ["12", "18", "24"],
+        2: ["07+07", "07+09", "07+12", "07+18", "09+09", "09+12", "09+18", "12+12", "12+18"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+09+09", "07+09+12", "09+09+09"]
+      },
+      "BM4OI-FM/out-28HN8_V1/EU": {
+        2: ["07+07", "07+09", "07+12", "07+18", "07+24", "09+09", "09+12", "09+18", "09+24", "12+12", "12+18", "12+24"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+07+18", "07+07+24", "07+09+09", "07+09+12", "07+09+18", "07+09+24", "07+12+12", "07+12+18", "07+12+24", "09+09+09", "09+09+12", "09+09+18", "09+09+24", "09+12+12", "09+12+18", "09+12+24", "12+12+12", "12+12+18"],
+        4: ["07+07+07+07", "07+07+07+09", "07+07+12+12", "07+07+07+18", "07+07+07+24", "07+07+09+09", "07+07+09+12", "07+07+09+18", "07+07+12+12", "07+07+12+18", "07+09+09+09", "07+09+09+12", "07+09+09+18", "07+09+12+12", "07+09+12+18", "07+12+12+12", "07+12+12+18", "09+09+09+09", "09+09+09+12", "09+09+09+18", "09+09+12+12", "09+09+12+18"]
+      },
+      "BM4OI-FM/out-36HN8_V1/EU": {
+        2: ["07+12", "07+18", "07+24", "09+09", "09+12", "09+18", "09+24", "12+12", "12+18", "12+24"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+07+18", "07+07+24", "07+09+09", "07+09+12", "07+09+18", "07+09+24", "07+12+12", "07+12+18", "07+12+24", "09+09+09", "09+09+12", "09+09+18", "09+09+24", "09+12+12", "09+12+18", "09+12+24", "12+12+12", "12+12+18", "12+12+24"],
+        4: ["07+07+07+07", "07+07+07+09", "07+07+07+12", "07+07+07+18", "07+07+07+24", "07+07+09+09", "07+07+09+12", "07+07+09+18", "07+07+09+24", "07+07+12+12", "07+07+12+18", "07+09+09+09", "07+09+09+12", "07+09+09+18", "07+09+12+12", "07+09+12+18", "07+12+12+12", "09+09+09+09", "09+09+09+12", "09+09+09+18", "09+09+12+12", "09+09+12+18", "09+12+12+12", "12+12+12+12"]
+      },
+      "BM5OI-FM/out-42HN8_V1/EU": {
+        2: ["07+18", "07+24", "09+12", "09+18", "09+24", "12+12", "12+18", "12+24"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+07+18", "07+07+24", "07+09+09", "07+09+12", "07+09+18", "07+09+24", "07+12+12", "07+12+18", "07+12+24", "09+09+09", "09+09+12", "09+09+18", "09+09+24", "09+12+12", "09+12+18", "09+12+24", "12+12+12", "12+12+18", "12+12+24"],
+        4: ["07+07+07+07", "07+07+07+09", "07+07+07+12", "07+07+07+18", "07+07+07+24", "07+07+09+09", "07+07+09+12", "07+07+09+18", "07+07+09+24", "07+07+12+12", "07+07+12+18", "07+07+12+24", "07+09+09+09", "07+09+09+12", "07+09+09+18", "07+09+09+24", "07+09+12+12", "07+09+12+18", "07+09+12+24", "07+12+12+12", "07+12+12+18", "07+12+12+24", "09+09+09+09", "09+09+09+12", "09+09+09+18", "09+09+09+24", "09+09+12+12", "09+09+12+18", "09+09+12+24", "09+12+12+12", "09+12+12+18", "09+12+12+24", "12+12+12+12", "12+12+12+18", "12+12+12+24"],
+        5: ["07+07+07+07+07", "07+07+07+07+09", "07+07+07+07+12", "07+07+07+07+18", "07+07+07+07+24", "07+07+07+09+09", "07+07+07+09+12", "07+07+07+09+18", "07+07+07+09+24", "07+07+07+12+12", "07+07+07+12+18", "07+07+07+12+24", "07+07+09+09+09", "07+07+09+09+12", "07+07+09+09+18", "07+07+09+09+24", "07+07+09+12+12", "07+07+09+12+18", "07+07+09+12+24", "07+07+12+12+12", "07+07+12+12+18", "07+07+12+12+24","07+09+09+09+09", "07+09+09+09+12", "07+09+09+09+18", "07+09+09+09+24", "07+09+09+12+12", "07+09+09+12+18", "07+09+09+12+24", "07+09+12+12+12", "07+09+12+12+18", "07+09+12+12+24", "07+12+12+12+12", "07+12+12+12+18", "09+09+09+09+09", "09+09+09+09+12", "09+09+09+09+18", "09+09+09+09+24", "09+09+09+12+12", "09+09+09+12+18", "09+09+09+12+24", "09+09+12+12+12", "09+09+12+12+18", "09+09+12+12+24", "09+12+12+12+12", "09+12+12+12+18", "12+12+12+12+12", "12+12+12+12+18"]
+      }
+    },
+    database: {
+outdoor: [
+  { 
+    model: "BM2OI-FM/out-14HN8_V1/EU", 
+    power: 4.1, 
+    minRooms: 1, 
+    maxRooms: 2, 
+    hcCode: "НС-1683761",
+    specs: {
+      cooling: "4,1",
+      heating: "4,1",
+      efficiency: "A++/A+",
+      noise: "56",
+      dimensions: "874×554×330",
+      weight: "31,6",
+      pipeLenSingle: "25",
+      pipeLenTotal: "40",
+      heightDiff: "15",
+      refrigerant: "R32/1100",
+      tempCool: "-15...+50",
+      tempHeat: "-15...+24"
+    }
+  },
+  { 
+    model: "BM2OI-FM/out-18HN8_V1/EU", 
+    power: 5.3, 
+    minRooms: 1, 
+    maxRooms: 2, 
+    hcCode: "НС-1683762",
+    specs: {
+      cooling: "5,3",
+      heating: "5,6",
+      efficiency: "A++/A+",
+      noise: "54",
+      dimensions: "874×554×330",
+      weight: "35,0",
+      pipeLenSingle: "25",
+      pipeLenTotal: "40",
+      heightDiff: "15",
+      refrigerant: "R32/1250",
+      tempCool: "-15...+50",
+      tempHeat: "-15...+24"
+    }
+  },
+  { 
+    model: "BM3OI-FM/out-21HN8_V1/EU", 
+    power: 6.2, 
+    minRooms: 1, 
+    maxRooms: 3, 
+    hcCode: "НС-1683763",
+    specs: {
+      cooling: "6,2",
+      heating: "6,2",
+      efficiency: "A++/A+",
+      noise: "58",
+      dimensions: "962×673×342",
+      weight: "43",
+      pipeLenSingle: "30",
+      pipeLenTotal: "60",
+      heightDiff: "15",
+      refrigerant: "R32/1500",
+      tempCool: "-15...+50",
+      tempHeat: "-15...+24"
+    }
+  },
+  { 
+    model: "BM4OI-FM/out-28HN8_V1/EU", 
+    power: 8.0, 
+    minRooms: 1, 
+    maxRooms: 4, 
+    hcCode: "НС-1683764",
+    specs: {
+      cooling: "8,2",
+      heating: "8,2",
+      efficiency: "A++/A+",
+      noise: "63",
+      dimensions: "1032×810×410",
+      weight: "62,1",
+      pipeLenSingle: "35",
+      pipeLenTotal: "80",
+      heightDiff: "15",
+      refrigerant: "R32/2100",
+      tempCool: "-15...+50",
+      tempHeat: "-15...+24"
+    }
+  },
+  { 
+    model: "BM4OI-FM/out-36HN8_V1/EU", 
+    power: 10.6, 
+    minRooms: 1, 
+    maxRooms: 4, 
+    hcCode: "НС-1683765",
+    specs: {
+      cooling: "10,6",
+      heating: "10,6",
+      efficiency: "A++/A+",
+      noise: "65",
+      dimensions: "1032×810×410",
+      weight: "68,8",
+      pipeLenSingle: "35",
+      pipeLenTotal: "80",
+      heightDiff: "15",
+      refrigerant: "R32/2100",
+      tempCool: "-15...+50",
+      tempHeat: "-15...+24"
+    }
+  },
+  { 
+    model: "BM5OI-FM/out-42HN8_V1/EU", 
+    power: 12.3, 
+    minRooms: 1, 
+    maxRooms: 5, 
+    hcCode: "НС-1683766",
+    specs: {
+      cooling: "12,3",
+      heating: "12,3",
+      efficiency: "A++/A+",
+      noise: "65",
+      dimensions: "1032×810×410",
+      weight: "74,1",
+      pipeLenSingle: "35",
+      pipeLenTotal: "80",
+      heightDiff: "15",
+      refrigerant: "R32/2900",
+      tempCool: "-15...+50",
+      tempHeat: "-15...+24"
+    }
+  }
+],
+      indoor: [
+        { model: "BSNI-FM/in-10HN8_V1/EU", power: 2.6, type: "Настенный", line: "Boho", hcCode: "HC-1683772" },
+        { model: "BSNI-FM/in-13HN8_V1/EU", power: 3.5, type: "Настенный", line: "Boho", hcCode: "HC-1683773" },
+        { model: "BSYI-FM/in-07HN8_V1/EU", power: 2.1, type: "Настенный", line: "Eco Smart", hcCode: "HC-1683767" },
+        { model: "BSYI-FM/in-09HN8_V1/EU", power: 2.8, type: "Настенный", line: "Eco Smart", hcCode: "HC-1683768" },
+        { model: "BSYI-FM/in-12HN8_V1/EU", power: 3.5, type: "Настенный", line: "Eco Smart", hcCode: "HC-1683769" },
+        { model: "BSYI-FM/in-18HN8_V1/EU", power: 5.3, type: "Настенный", line: "Eco Smart", hcCode: "HC-1683770" }
+      ]
+    }
+  },
+
+  "electrolux": {
+    name: "Electrolux",
+    color: "#00205b",
+    logo: "https://assets.rkcdn.ru/rusklimat.ru/brand-electrolux.svg",
+    types: ["Настенный", "Кассетный", "Канальный", "Консольный"],
+    lines: {
+      "Настенный": ["Fusion", "Enterprise White", "Enterprise Black"],
+      "Кассетный": [null],
+      "Канальный": [null],
+      "Консольный": [null]
+    },
+    lineImages: {
+      "Fusion": "https://rkcdn.ru/products/1179818a-4b97-11f0-b8df-00505601218a/src.webp",
+      "Enterprise White": "https://rkcdn.ru/products/02636524-9b50-11ef-b8dc-00505601218a/src.webp",
+      "Enterprise Black": "https://rkcdn.ru/products/8b64554c-4a65-11ef-b8d9-00505601218a/src.webp",
+      "Кассетный": "https://rkcdn.ru/products/9a0b88c5-e80a-11ec-b732-005056013a69/src.webp",
+      "Канальный": "https://rkcdn.ru/products/85df70dc-bc4e-11ef-b8dc-00505601218a/src.webp",
+      "Консольный": "https://rkcdn.ru/products/0819298f-3e12-11ef-b8d9-00505601218a/main_big.webp"
+    },
+    // ТАБЛИЦЫ СОВМЕСТИМОСТИ (Electrolux)
+    combinations: {
+      "EACO/I-14 FMI-2/N8": {
+        1: ["09", "12"],
+        2: ["07+07", "07+09", "07+12", "09+09", "09+12"]
+      },
+      "EACO/I-18 FMI-2/N8": {
+        1: ["09", "12"],
+        2: ["07+07", "07+09", "07+12", "09+09", "09+12", "12+12"]
+      },
+      "EACO/I-24 FMI-3/N8": {
+        2: ["07+07", "07+09", "07+12", "07+18", "09+09", "09+12", "12+12", "12+18", "18+18"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+09+09", "07+09+12", "09+09+09", "09+09+12", "09+12+12", "12+12+12"]
+      },
+      "EACO/I-28 FMI-4/N8": {
+        2: ["07+07", "07+09", "07+12", "07+18", "09+09", "09+12", "12+12", "12+18", "18+18"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+09+09", "07+09+12", "09+09+09", "09+09+12", "09+12+12", "12+12+12"],
+        4: ["07+07+07+07", "07+07+07+09", "07+07+07+12", "07+07+09+09", "07+07+09+12", "07+09+09+09"]
+      },
+
+"EACO/I-36 FMI-4/N8": {
+  2: [
+    "07+12", "07+18", "07+21", "07+24",
+    "09+09", "09+12", "09+18", "09+21", "09+24",
+    "12+12", "12+18", "12+21", "12+24",
+    "18+18", "18+21", "18+24",
+    "21+21", "21+24", "24+24"
+  ],
+  3: [
+    "07+07+07", "07+07+09", "07+07+12", "07+07+18", "07+07+21", "07+07+24",
+    "07+09+09", "07+09+12", "07+09+18", "07+09+21", "07+09+24",
+    "07+12+12", "07+12+18", "07+12+21", "07+12+24",
+    "09+09+09", "09+09+12", "09+09+18", "09+09+21", "09+09+24",
+    "09+12+12", "09+12+18", "09+12+21", "09+12+24",
+    "09+18+18", "09+18+21", "09+18+24",
+    "09+21+21", "09+21+24",
+    "12+12+12", "12+12+18", "12+12+21", "12+12+24",
+    "12+18+18", "12+18+21", "12+18+24",
+    "12+21+21",
+    "18+18+18"
+  ],
+  4: [
+    "07+07+07+07", "07+07+07+09", "07+07+07+12", "07+07+07+18", "07+07+07+21", "07+07+07+24",
+    "07+07+09+09", "07+07+09+12", "07+07+09+18", "07+07+09+21", "07+07+09+24",
+    "07+07+12+12", "07+07+12+18", "07+07+12+21", "07+07+12+24",
+    "07+09+09+09", "07+09+09+12", "07+09+09+18", "07+09+09+21", "07+09+09+24",
+    "07+09+12+12", "07+09+12+18", "07+09+12+21", "07+09+12+24",
+    "09+09+09+09", "09+09+09+12", "09+09+09+18", "09+09+09+21", "09+09+09+24",
+    "09+09+12+12", "09+09+12+18", "09+09+12+21", "09+09+12+24",
+    "09+09+18+18",
+    "09+12+12+12", "09+12+12+18", "09+12+12+21",
+    "12+12+12+12", "12+12+12+18"
+  ]
+},
+
+"EACO/I-42 FMI-5/N8": {
+  2: [
+    "07+18", "07+21", "07+24",
+    "09+09", "09+12", "09+18", "09+21", "09+24",
+    "12+12", "12+18", "12+21", "12+24",
+    "18+18", "18+21", "18+24",
+    "21+21", "21+24", "24+24"
+  ],
+  3: [
+    "07+07+07", "07+07+09", "07+07+12", "07+07+18", "07+07+21", "07+07+24",
+    "07+09+09", "07+09+12", "07+09+18", "07+09+21", "07+09+24",
+    "07+12+12", "07+12+18", "07+12+21", "07+12+24",
+    "09+09+09", "09+09+12", "09+09+18", "09+09+21", "09+09+24",
+    "09+12+12", "09+12+18", "09+12+21", "09+12+24",
+    "09+18+18", "09+18+21", "09+18+24",
+    "09+21+21", "09+21+24",
+    "12+12+12", "12+12+18", "12+12+21", "12+12+24",
+    "12+18+18", "12+18+21", "12+18+24",
+    "12+21+21",
+    "18+18+18"
+  ],
+  4: [
+    "07+07+07+07", "07+07+07+09", "07+07+07+12", "07+07+07+18", "07+07+07+21", "07+07+07+24",
+    "07+07+09+09", "07+07+09+12", "07+07+09+18", "07+07+09+21", "07+07+09+24",
+    "07+07+12+12", "07+07+12+18", "07+07+12+21", "07+07+12+24",
+    "07+09+09+09", "07+09+09+12", "07+09+09+18", "07+09+09+21", "07+09+09+24",
+    "07+09+12+12", "07+09+12+18", "07+09+12+21", "07+09+12+24",
+    "09+09+09+09", "09+09+09+12", "09+09+09+18", "09+09+09+21", "09+09+09+24",
+    "09+09+12+12", "09+09+12+18", "09+09+12+21", "09+09+12+24",
+    "09+09+18+18",
+    "09+12+12+12", "09+12+12+18", "09+12+12+21",
+    "12+12+12+12", "12+12+12+18"
+  ],
+  5: [
+    "07+07+07+07+07", "07+07+07+07+09", "07+07+07+07+12", "07+07+07+07+18", "07+07+07+07+21", "07+07+07+07+24",
+    "07+07+07+09+09", "07+07+07+09+12", "07+07+07+09+18", "07+07+07+09+21", "07+07+07+09+24",
+    "07+07+07+12+12", "07+07+07+12+18", "07+07+07+12+21", "07+07+07+12+24",
+    "07+07+09+09+09", "07+07+09+09+12", "07+07+09+09+18", "07+07+09+09+21", "07+07+09+09+24",
+    "07+07+09+12+12", "07+07+09+12+18", "07+07+09+12+21", "07+07+09+12+24",
+    "07+09+09+09+09", "07+09+09+09+12", "07+09+09+09+18", "07+09+09+09+21", "07+09+09+09+24",
+    "07+09+09+12+12", "07+09+09+12+18", "07+09+09+12+21", "07+09+09+12+24",
+    "09+09+09+09+09", "09+09+09+09+12", "09+09+09+09+18", "09+09+09+09+21", "09+09+09+09+24",
+    "09+09+09+12+12", "09+09+09+12+18", "09+09+09+12+21", "09+09+09+12+24",
+    "09+09+09+18+18",
+    "09+09+12+12+12", "09+09+12+12+21",
+    "09+12+12+12+12", "09+12+12+12+18",
+    "12+12+12+12+12"
+  ]
+}
+    },
+    database: {
+outdoor: [
+  { 
+    model: "EACO/I-14 FMI-2/N8", 
+    power: 4.1, 
+    minRooms: 1, 
+    maxRooms: 2, 
+    hcCode: "HC-1194630",
+    specs: {
+      cooling: "4,1",
+      heating: "4,4",
+      efficiency: "A++/A+",
+      noise: "50",
+      dimensions: "822×550×352",
+      weight: "30,0",
+      pipeLenSingle: "20",
+      pipeLenTotal: "40",
+      heightDiff: "15",
+      refrigerant: "R32/750",
+      tempCool: "-15...+43",
+      tempHeat: "-22...+24"
+    }
+  },
+  { 
+    model: "EACO/I-18 FMI-2/N8", 
+    power: 5.3, 
+    minRooms: 1, 
+    maxRooms: 2, 
+    hcCode: "HC-1194443",
+    specs: {
+      cooling: "5,3",
+      heating: "5,65",
+      efficiency: "A++/A+",
+      noise: "50",
+      dimensions: "822×550×352",
+      weight: "32,0",
+      pipeLenSingle: "20",
+      pipeLenTotal: "40",
+      heightDiff: "15",
+      refrigerant: "R32/900",
+      tempCool: "-15...+43",
+      tempHeat: "-22...+24"
+    }
+  },
+  { 
+    model: "EACO/I-24 FMI-3/N8", 
+    power: 7.1, 
+    minRooms: 1, 
+    maxRooms: 3, 
+    hcCode: "HC-1273406",
+    specs: {
+      cooling: "7,1",
+      heating: "8,6",
+      efficiency: "A++/A+",
+      noise: "57",
+      dimensions: "964×660×402",
+      weight: "47,5",
+      pipeLenSingle: "20",
+      pipeLenTotal: "60",
+      heightDiff: "15",
+      refrigerant: "R32/1700",
+      tempCool: "-15...+43",
+      tempHeat: "-22...+24"
+    }
+  },
+  { 
+    model: "EACO/I-28 FMI-4/N8", 
+    power: 8.0, 
+    minRooms: 1, 
+    maxRooms: 4, 
+    hcCode: "HC-1194446",
+    specs: {
+      cooling: "8,0",
+      heating: "9,5",
+      efficiency: "A++/A+",
+      noise: "58",
+      dimensions: "964×660×402",
+      weight: "51,0",
+      pipeLenSingle: "20",
+      pipeLenTotal: "70",
+      heightDiff: "15",
+      refrigerant: "R32/1800",
+      tempCool: "-15...+43",
+      tempHeat: "-22...+24"
+    }
+  },
+  { 
+    model: "EACO/I-36 FMI-4/N8", 
+    power: 10.6, 
+    minRooms: 1, 
+    maxRooms: 4, 
+    hcCode: "HC-1273407",
+    specs: {
+      cooling: "10,6",
+      heating: "12",
+      efficiency: "A++/A+",
+      noise: "60",
+      dimensions: "1020×826×427",
+      weight: "72",
+      pipeLenSingle: "25",
+      pipeLenTotal: "80",
+      heightDiff: "25",
+      refrigerant: "R32/2400",
+      tempCool: "-15...+43",
+      tempHeat: "-22...+24"
+    }
+  },
+  { 
+    model: "EACO/I-42 FMI-5/N8", 
+    power: 12.1, 
+    minRooms: 1, 
+    maxRooms: 5, 
+    hcCode: "HC-1194448",
+    specs: {
+      cooling: "12,1",
+      heating: "13",
+      efficiency: "A++/A+",
+      noise: "60",
+      dimensions: "1020×826×427",
+      weight: "72",
+      pipeLenSingle: "25",
+      pipeLenTotal: "100",
+      heightDiff: "25",
+      refrigerant: "R32/2400",
+      tempCool: "-15...+43",
+      tempHeat: "-22...+24"
+    }
+  }
+],
+      indoor: [
+        { model: "EACS/I-07 HMB FMI/N8_ERP/in_WF", power: 2.2, type: "Настенный", line: "Fusion", hcCode: "HC-1683895" },
+        { model: "EACS/I-09 HMB FMI/N8_ERP/in_WF", power: 2.5, type: "Настенный", line: "Fusion", hcCode: "HC-1683896" },
+        { model: "EACS/I-12 HMB FMI/N8_ERP/in_WF", power: 3.2, type: "Настенный", line: "Fusion", hcCode: "HC-1683897" },
+        { model: "EACS/I-18 HMB FMI/N8_ERP/in_WF", power: 4.6, type: "Настенный", line: "Fusion", hcCode: "HC-1683898" },
+        { model: "EACS/I-09 HEN FMI/N8_ERP_WT/in", power: 2.7, type: "Настенный", line: "Enterprise White", hcCode: "HC-1602065" },
+        { model: "EACS/I-12 HEN FMI/N8_ERP_WT/in", power: 3.5, type: "Настенный", line: "Enterprise White", hcCode: "HC-1602071" },
+        { model: "EACS/I-18 HEN FMI/N8_ERP_WT/in", power: 5.3, type: "Настенный", line: "Enterprise White", hcCode: "HC-1602076" },
+        { model: "EACS/I-09 HEN FMI/N8_ERP/in", power: 2.7, type: "Настенный", line: "Enterprise Black", hcCode: "HC-1381368" },
+        { model: "EACS/I-12 HEN FMI/N8_ERP/in", power: 3.5, type: "Настенный", line: "Enterprise Black", hcCode: "HC-1381369" },
+        { model: "EACS/I-18 HEN FMI/N8_ERP/in", power: 5.3, type: "Настенный", line: "Enterprise Black", hcCode: "HC-1381370" },
+        { model: "EACC/I-12 FMI/N8_ERP", power: 3.5, type: "Кассетный", line: null, hcCode: "HC-1194465" },
+        { model: "EACC/I-18 FMI/N8_ERP", power: 5.0, type: "Кассетный", line: null, hcCode: "HC-1194516" },
+        { model: "EACC/I-24 FMI/N8_ERP", power: 7.0, type: "Кассетный", line: null, hcCode: "HC-1194518" },
+        { model: "EACD/I-09 FMI/N8_ERP", power: 2.65, type: "Канальный", line: null, hcCode: "HC-1194528" },
+        { model: "EACD/I-12 FMI/N8_ERP", power: 3.5, type: "Канальный", line: null, hcCode: "HC-1194535" },
+        { model: "EACD/I-18 FMI/N8_ERP", power: 5.0, type: "Канальный", line: null, hcCode: "HC-1194536" },
+        { model: "EACD/I-24 FMI/N8_ERP", power: 7.0, type: "Канальный", line: null, hcCode: "HC-1194537" },
+        { model: "EACW/I-09 FMI/N8_ERP", power: 2.7, type: "Консольный", line: null, hcCode: "HC-1381342" },
+        { model: "EACW/I-12 FMI/N8_ERP", power: 3.5, type: "Консольный", line: null, hcCode: "HC-1381364" },
+        { model: "EACW/I-18 FMI/N8_ERP", power: 5.2, type: "Консольный", line: null, hcCode: "HC-1381365" }
+      ]
+    }
+  },
+  
+  "shuft": {
+    name: "Shuft",
+    color: "#333333",
+    logo: "https://rkcdn.ru/products/671036c3-badf-11f0-b8e1-00505601218a/main_small.webp",
+    types: ["Настенный"],
+    lines: {"Настенный": ["Standard", "Wi-Fi"]},
+    lineImages: {
+      "Standard": "https://rkcdn.ru/products/18198e4c-4b97-11f0-b8df-00505601218a/src.webp",
+      "Wi-Fi": "https://rkcdn.ru/products/18198e4c-4b97-11f0-b8df-00505601218a/src.webp"
+    },
+    // ТАБЛИЦЫ СОВМЕСТИМОСТИ (Shuft)
+    combinations: {
+      "SFMO/I-14 FMI-2/N8": {
+        1: ["07", "09", "12"],
+        2: ["07+07", "07+09","07+12","09+09", "09+12"]
+      },
+      "SFMO/I-18 FMI-2/N8": {
+        1: ["09", "12", "18"],
+        2: ["07+07", "07+09", "07+12","07+18","09+09", "09+12", "12+12", "09+18", "12+12"]
+      },
+      "SFMO/I-21 FMI-3/N8": {
+        2: ["07+07", "07+09", "07+12", "07+18", "09+09", "09+12", "09+18", "12+12", "12+18"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+09+09", "07+09+12", "09+09+09", "09+09+12"]
+      },
+      "SFMO/I-27 FMI-3/N8": {
+        2: ["07+12", "07+18", "09+09", "09+12", "09+18", "12+12", "12+18", "18+18"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+07+18", "07+09+09", "07+09+12", "07+09+18", "07+12+12", "07+12+18", "09+09+09", "09+09+12", "09+09+18", "09+12+12", "12+12+12"]
+      },
+      "SFMO/I-32 FMI-4/N8": {
+        2: ["09+12", "09+18", "12+12", "12+18", "18+18"],
+        3: ["07+07+07", "07+07+09", "07+07+12", "07+09+09", "07+09+12", "09+09+09"],
+        4: ["07+07+07+07", "07+07+07+09", "07+07+09+09", "07+09+09+09"]
+      },
+      "SFMO/I-42 FMI-5/N8": {
+        2: ["09+12", "09+18", "12+12", "12+18", "18+18"],
+        3: ["07+12+12", "07+12+18", "09+09+12", "09+12+12", "12+12+12"],
+        4: ["07+07+07+07", "07+09+09+09", "09+09+09+12", "07+07+09+12", "07+09+12+12", "09+12+12+12", "07+07+07+09", "07+07+07+12", "07+07+09+09", "07+09+09+12", "09+09+12+12", "07+07+12+12", "07+09+09+09"],
+        5: ["07+07+07+07", "07+09+09+09", "07+07+07+09", "07+07+09+09", "07+09+09+12", "09+09+12+12", "07+07+07+12", "07+07+09+12", "07+09+12+12", "09+12+12+12", "07+07+12+12", "07+09+09+09"] 
+      }
+    },
+    database: {
+outdoor: [
+  { 
+    model: "SFMO/I-14 FMI-2/N8", 
+    power: 4.1, 
+    minRooms: 1, 
+    maxRooms: 2, 
+    hcCode: "HC-1598973",
+    specs: {
+      cooling: "4,1",
+      heating: "4,5",
+      efficiency: "A++/A+",
+      noise: "64",
+      dimensions: "853×602×349",
+      weight: "29",
+      pipeLenSingle: "25",
+      pipeLenTotal: "40",
+      heightDiff: "15",
+      refrigerant: "R32/830",
+      tempCool: "-15...+53",
+      tempHeat: "-20...+30"
+    }
+  },
+  { 
+    model: "SFMO/I-18 FMI-2/N8", 
+    power: 5.1, 
+    minRooms: 1, 
+    maxRooms: 2, 
+    hcCode: "HC-1598974",
+    specs: {
+      cooling: "5,1",
+      heating: "5,2",
+      efficiency: "A++/A+",
+      noise: "65",
+      dimensions: "853×602×349",
+      weight: "31",
+      pipeLenSingle: "25",
+      pipeLenTotal: "40",
+      heightDiff: "15",
+      refrigerant: "R32/1100",
+      tempCool: "-15...+53",
+      tempHeat: "-20...+30"
+    }
+  },
+  { 
+    model: "SFMO/I-24 FMI-3/N8", 
+    power: 6.2, 
+    minRooms: 1, 
+    maxRooms: 3, 
+    hcCode: "HC-1598975",
+    specs: {
+      cooling: "6,2",
+      heating: "6,5",
+      efficiency: "A++/A+",
+      noise: "68",
+      dimensions: "920×699×380",
+      weight: "42",
+      pipeLenSingle: "25",
+      pipeLenTotal: "60",
+      heightDiff: "15",
+      refrigerant: "R32/1500",
+      tempCool: "-15...+53",
+      tempHeat: "-20...+30"
+    }
+  },
+  { 
+    model: "SFMO/I-27 FMI-3/N8", 
+    power: 7.9, 
+    minRooms: 1, 
+    maxRooms: 3, 
+    hcCode: "HC-1598976",
+    specs: {
+      cooling: "7,9",
+      heating: "7,96",
+      efficiency: "A++/A+",
+      noise: "67",
+      dimensions: "920×699×380",
+      weight: "42",
+      pipeLenSingle: "25",
+      pipeLenTotal: "60",
+      heightDiff: "15",
+      refrigerant: "R32/1500",
+      tempCool: "-15...+53",
+      tempHeat: "-20...+30"
+    }
+  },
+  { 
+    model: "SFMO/I-32 FMI-4/N8", 
+    power: 9.4, 
+    minRooms: 1, 
+    maxRooms: 4, 
+    hcCode: "HC-1598977",
+    specs: {
+      cooling: "9,4",
+      heating: "9,45",
+      efficiency: "A++/A+",
+      noise: "70",
+      dimensions: "990×910×340",
+      weight: "68",
+      pipeLenSingle: "25",
+      pipeLenTotal: "80",
+      heightDiff: "15",
+      refrigerant: "R32/2200",
+      tempCool: "-15...+53",
+      tempHeat: "-20...+30"
+    }
+  },
+  { 
+    model: "SFMO/I-42 FMI-5/N8", 
+    power: 12.2, 
+    minRooms: 1, 
+    maxRooms: 5, 
+    hcCode: "HC-1598978",
+    specs: {
+      cooling: "12,2",
+      heating: "12,2",
+      efficiency: "A++/A+",
+      noise: "70",
+      dimensions: "990×910×340",
+      weight: "73",
+      pipeLenSingle: "25",
+      pipeLenTotal: "90",
+      heightDiff: "15",
+      refrigerant: "R32/3000",
+      tempCool: "-15...+53",
+      tempHeat: "-20...+30"
+    }
+  }
+],
+      indoor: [
+        { model: "SFMS/I-07 HB FMI/N8", power: 2.1, type: "Настенный", line: "Standard", hcCode: "HC-1598969" },
+        { model: "SFMS/I-09 HB FMI/N8", power: 2.6, type: "Настенный", line: "Standard", hcCode: "HC-1598970" },
+        { model: "SFMS/I-12 HB FMI/N8", power: 3.5, type: "Настенный", line: "Standard", hcCode: "HC-1598971" },
+        { model: "SFMS/I-18 HB FMI/N8", power: 5.1, type: "Настенный", line: "Standard", hcCode: "HC-1598972" },
+        { model: "SFMS/I-07 HB FMI/N8/white_WF", power: 2.1, type: "Настенный", line: "Wi-Fi", hcCode: "HC-1696991" },
+        { model: "SFMS/I-09 HB FMI/N8/white_WF", power: 2.6, type: "Настенный", line: "Wi-Fi", hcCode: "HC-1696992" },
+        { model: "SFMS/I-12 HB FMI/N8/white_WF", power: 3.5, type: "Настенный", line: "Wi-Fi", hcCode: "HC-1696993" },
+        { model: "SFMS/I-18 HB FMI/N8/white_WF", power: 5.1, type: "Настенный", line: "Wi-Fi", hcCode: "HC-1696994" }
+      ]
+    }
+  }
+};
+
+// === БАЗА УТП ПО БРЕНДАМ И ТИПАМ ===
+const featuresDB = {
+  "ballu-free": {
+    "Platinum Evolution": [
+      " 4 направления потока воздуха",
+       " Wi-Fi управление (опция)",
+      " Тихая работа (21 дБ)",
+      " Широкий модельный ряд "
+    ],
+    "Evolution Noire": [
+      " Премиальный чёрный дизайн",
+      " 4 направления потока воздуха",
+       " Wi-Fi управление (опция)",
+      " Тихая работа (21 дБ)",
+      " Широкий модельный ряд "
+    ],
+    "Defender": [
+      " Wi-Fi управление (опция)",
+      " УФ-обработка воздуха ",
+      " Перфорированные жалюзи ",
+      " Широкий модельный ряд ",
+      " 4 направления потока воздуха "
+    ],
+    "Defender_SV": [
+      " Wi-Fi управление (опция)",
+      " УФ-обработка воздуха ",
+      " Перфорированные жалюзи ",
+      " Широкий модельный ряд ",
+      " 4 направления потока воздуха "
+    ],
+    "Кассетный": [
+      " Встроенная помпа (перепад до 1000 мм) ",
+      " 26 см толщина блока ",
+      " Компактные размеры "
+    ],
+    "Канальный": [
+      "28 дБ тихая работа",
+      "Всего 20 см толщина блока",
+      "Функция увеличения напора",
+    ]
+  },
+  
+  "ballu-smart": {
+    "Boho": [
+      " ION AIR  ионизация воздуха",
+      " Wi-Fi управление (опция)",
+      "EASY CHANGE сменная панель",
+
+    ],
+    "Eco Smart": [
+      "19,5 дБ уровень шума",
+      "Wi-Fi управление (опция)",
+      "3D-контроль потока воздуха"
+    ]
+  },
+  
+  "electrolux": {
+    "Fusion": [
+      " Плазменная очистка воздуха ",
+      " 7 скоростей вентилятора ",
+      " 4D-поток воздуха ",
+      " Система свободной компоновки ",
+      " Функция I-Feel ",
+      " Комплекс самодиагностики "
+    ],
+    "Enterprise White": [
+      " Премиальный белый дизайн ",
+      " УФ - обеззораживание воздуха ",
+      " Автоочистка полного цикла ",
+      "️ Генератор холодной плазмы ",
+      " 4D-поток воздуха ",
+      " Система свободной компоновки ",
+      " Функция I-Feel "
+    ],
+    "Enterprise Black": [
+      " Премиальный белый дизайн ",
+      " УФ - обеззораживание воздуха ",
+      " Автоочистка полного цикла ",
+      "️ Генератор холодной плазмы ",
+      " 4D-поток воздуха ",
+      " Система свободной компоновки ",
+      " Функция I-Feel "
+    ],
+    "Кассетный": [
+      " Компактный дизайн ",
+      " Система свободной компоновки ",
+      " Возможность подмеса свежего воздуха ",
+      "️ Ночной режим",
+      " Комплекс самодиагностики ",
+      " Защита от перепадов напряжения "
+    ],
+    "Канальный": [
+      " Компактный дизайн ",
+      " Система свободной компоновки ",
+      " Возможность подмеса свежего воздуха ",
+      " Встроенная дренажная помпа (перепад до 850 мм) ",
+      " Комплекс самодиагностики ",
+      " Защита от перепадов напряжения ",
+      " Проводной пульт в комплекте "
+    ],
+    "Консольный": [
+      " Компактный размер",
+      " Система свободной компоновки ",
+      " Фотокаталитический фильтр",
+      "️ Ночной режим",
+      " Комплекс самодиагностики ",
+      " Защита от перепадов напряжения "
+    ]
+  },
+  
+  "shuft": {
+    "Standard": [
+      " Доступная цена",
+      " Стабильная работа пр низком напряжении от 165В ",
+      " A++ Энергоэффективность"
+    ],
+    "Wi-Fi": [
+      " Доступная цена",
+      " Встроенный Wi-Fi модуль",
+      " Стабильная работа пр низком напряжении от 165В ",
+      " A++ Энергоэффективность"
+    ]
+  }
+};
+
+let currentBrand = "ballu-free";
+let database = brands[currentBrand].database;
+let lineImages = brands[currentBrand].lineImages;
+const roomsData = {};
+let currentRoom = null;
+
+// === ФУНКЦИЯ ПРОВЕРКИ СОВМЕСТИМОСТИ ===
+function checkCompatibility(brandKey, outdoorModel, indoorUnits) {
+  const brandData = brands[brandKey];
+  // Если таблиц нет для этого бренда, пропускаем проверку (разрешаем всё)
+  if (!brandData.combinations || !brandData.combinations[outdoorModel]) return true;
+
+  const allowedCombos = brandData.combinations[outdoorModel];
+  const roomCount = indoorUnits.length;
+  
+  // Получаем коды мощностей (07, 09, 12...)
+  const codes = indoorUnits.map(u => getIndoorCode(u.power)).sort();
+  const comboString = codes.join("+");
+  
+  // Проверяем, есть ли такая комбинация в списке разрешенных для этого кол-ва комнат
+  if (allowedCombos[roomCount]) {
+    return allowedCombos[roomCount].includes(comboString);
+  }
+  
+  return false;
+}
+
+function initBrandTabs() {
+  const container = document.getElementById('brandTabs');
+  container.innerHTML = '';
+  for (const [key, brand] of Object.entries(brands)) {
+    const btn = document.createElement('button');
+    btn.className = `brand-btn ${key === currentBrand ? 'active' : ''}`;
+    btn.textContent = brand.name;
+    btn.onclick = () => switchBrand(key);
+    container.appendChild(btn);
+  }
+}
+
+function switchBrand(brandKey) {
+  if (brandKey === currentBrand) return;
+  currentBrand = brandKey;
+  const brandData = brands[currentBrand];
+  document.documentElement.style.setProperty('--brand-color', brandData.color);
+  document.documentElement.style.setProperty('--brand-color-hover', brandData.color);
+  lineImages = brands[currentBrand].lineImages;
+  database = brands[currentBrand].database;
+  document.querySelectorAll('.brand-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === brandData.name);
+  });
+  for (let key in roomsData) delete roomsData[key];
+  document.getElementById('result').classList.remove('active');
+  document.getElementById('roomInputs').classList.remove('active');
+  updateDropdownsForBrand();
+  renderRooms();
+  updateBrandLogo();
+}
+
+// === ФУНКЦИЯ ОБНОВЛЕНИЯ ЛОГОТИПА ===
+function updateBrandLogo() {
+  const logoImg = document.getElementById('brandLogo');
+  const brandData = brands[currentBrand];
+  
+  if (brandData.logo) {
+    logoImg.src = brandData.logo;
+    logoImg.classList.add('visible');
+  } else {
+    logoImg.classList.remove('visible');
+    setTimeout(() => {
+      logoImg.src = '';
+    }, 300);
+  }
+}
+// === КОНЕЦ ФУНКЦИИ ===
+
+// === ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ ЦЕН ===
+let pricesData = {};
+
+// === ФУНКЦИЯ ЗАГРУЗКИ CSV ===
+async function loadPrices() {
+  const statusEl = document.getElementById('priceStatus');
+  
+  try {
+    const response = await fetch('prices.csv');
+    if (!response.ok) throw new Error('Файл не найден');
+    
+    let csvText = await response.text();
+    
+    // Удаляем BOM-символ
+    if (csvText.charCodeAt(0) === 0xFEFF) {
+      csvText = csvText.slice(1);
+    }
+    
+    const rows = csvText.split('\n').map(row => row.trim()).filter(row => row);
+    
+    if (rows.length < 2) throw new Error('Файл пустой');
+    
+    // Автоопределение разделителя
+    const firstRow = rows[0];
+    let separator = ',';
+    if (firstRow.includes(';')) separator = ';';
+    else if (firstRow.includes('\t')) separator = '\t';
+    
+    const headers = firstRow.split(separator).map(h => h.trim().replace(/^"|"$/g, ''));
+    
+    // Функция гибкого поиска колонки (ищет по подстроке, без учета регистра)
+    function findColumn(searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      // Точное совпадение
+      let idx = headers.findIndex(h => h.toLowerCase() === lowerSearch);
+      if (idx !== -1) return idx;
+      // Поиск по подстроке
+      idx = headers.findIndex(h => h.toLowerCase().includes(lowerSearch));
+      return idx;
+    }
+    
+    const hcIndex = findColumn('HC');
+    const articleIndex = findColumn('Артикул');
+    const розницаIdx = findColumn('Розница');
+    const дилерIdx = findColumn('Дилер');
+    const д2Idx = findColumn('Д2');
+    const bigIdx = findColumn('BIG');
+    
+    if (hcIndex === -1) {
+      throw new Error('Колонка HC-код не найдена. Заголовки в файле: [' + headers.join(', ') + ']');
+    }
+    
+    pricesData = {};
+    let loadedCount = 0;
+    
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      // Пропускаем пустые строки и строки без HC-кода
+      if (!row || row.length < 5) continue;
+      
+      const values = row.split(separator).map(v => v.trim().replace(/^"|"$/g, ''));
+      if (values.length < hcIndex + 1) continue;
+      
+      let hcCode = values[hcIndex];
+      // Пропускаем пустые HC-коды и заголовки разделов
+      if (!hcCode || hcCode.length < 5 || hcCode.includes('FREE') || hcCode.includes('MATCH')) continue;
+      
+      // Заменяем кириллицу на латиницу
+      hcCode = hcCode.replace(/НС/g, 'HC').replace(/Н/g, 'H').replace(/С/g, 'C').trim();
+      
+      const article = articleIndex !== -1 ? values[articleIndex] : '';
+      
+      pricesData[hcCode] = {
+        article: article,
+        Розница: розницаIdx !== -1 ? parseFloat(String(values[розницаIdx]).replace(/\s/g, '')) || 0 : 0,
+        Дилер: дилерIdx !== -1 ? parseFloat(String(values[дилерIdx]).replace(/\s/g, '')) || 0 : 0,
+        Д2: д2Idx !== -1 ? parseFloat(String(values[д2Idx]).replace(/\s/g, '')) || 0 : 0,
+        BIG: bigIdx !== -1 ? parseFloat(String(values[bigIdx]).replace(/\s/g, '')) || 0 : 0
+      };
+      loadedCount++;
+    }
+    
+    statusEl.textContent = `✅ Загружено ${loadedCount} позиций`;
+    statusEl.style.color = '#27ae60';
+    
+    localStorage.setItem('pricesData', JSON.stringify(pricesData));
+    localStorage.setItem('priceLoadTime', new Date().toLocaleString());
+    
+  } catch (error) {
+    statusEl.textContent = `❌ Ошибка: ${error.message}`;
+    statusEl.style.color = '#e74c3c';
+  }
+}
+
+// === ЗАГРУЗКА ЦЕН ПРИ СТАРТЕ ===
+function loadPricesFromStorage() {
+  const saved = localStorage.getItem('pricesData');
+  if (saved) {
+    pricesData = JSON.parse(saved);
+    const statusEl = document.getElementById('priceStatus');
+    const loadTime = localStorage.getItem('priceLoadTime') || '';
+    const count = Object.keys(pricesData).length;
+    statusEl.textContent = `Загружено ${count} позиций ${loadTime ? '(' + loadTime + ')' : ''}`;
+    statusEl.style.color = '#27ae60';
+  }
+}
+
+// === ПОЛУЧЕНИЕ ЦЕНЫ ===
+function getPrice(hcCode) {
+  if (pricesData[hcCode]) {
+    return pricesData[hcCode]['Розница'] || 0;
+  }
+  return 0;
+}
+
+// === ПОЛУЧЕНИЕ АРТИКУЛА ===
+function getArticle(hcCode) {
+  if (pricesData[hcCode]) {
+    return pricesData[hcCode].article || '';
+  }
+  return '';
+}
+
+function updateDropdownsForBrand() {
+  const typeSelect = document.getElementById('unitType');
+  const brandData = brands[currentBrand];
+  typeSelect.innerHTML = '';
+  brandData.types.forEach(type => {
+    const opt = document.createElement('option');
+    opt.value = type;
+    opt.textContent = type;
+    typeSelect.appendChild(opt);
+  });
+  updateLinesForType(typeSelect.value);
+}
+
+function updateLinesForType(type) {
+  const lineSelect = document.getElementById('unitLine');
+  const brandData = brands[currentBrand];
+  lineSelect.innerHTML = '';
+  const lines = brandData.lines[type];
+  if (lines && lines.length > 0) {
+    lines.forEach(line => {
+      const opt = document.createElement('option');
+      opt.value = line;
+      opt.textContent = line === null ? "Стандарт" : line;
+      lineSelect.appendChild(opt);
+    });
+    document.getElementById('seriesRow').classList.remove('hidden');
+  } else {
+    document.getElementById('seriesRow').classList.add('hidden');
+  }
+}
+
+function toggleSeriesField() {
+  const type = document.getElementById('unitType').value;
+  updateLinesForType(type);
+  updateUnitImage();
+}
+
+function updateUnitImage() {
+  const type = document.getElementById('unitType').value;
+  const line = document.getElementById('unitLine').value;
+  const img = document.getElementById('unitImage');
+  const placeholder = document.getElementById('unitPlaceholder');
+  const featuresIcon = document.getElementById('featuresIcon');
+  const featuresList = document.getElementById('featuresList');
+  
+  let src = null;
+  let featureKey = null;
+  
+  // Определяем ключ для поиска УТП
+  if (type === 'Настенный' && line) {
+    // Для настенных — используем линейку
+    featureKey = line;
+    if (lineImages[line]) src = lineImages[line];
+  } else {
+    // Для кассетных, канальных, консольных — используем тип
+    featureKey = type;
+    if (lineImages[type]) src = lineImages[type];
+  }
+  
+  if (src) {
+    img.src = src;
+    img.style.display = 'inline-block';
+    placeholder.style.display = 'none';
+    
+    // Ищем УТП с учётом бренда
+    const brandFeatures = featuresDB[currentBrand];
+    if (brandFeatures && brandFeatures[featureKey]) {
+      featuresList.innerHTML = brandFeatures[featureKey].map(f => `<li>${f}</li>`).join('');
+      featuresIcon.style.display = 'flex';
+    } else {
+      featuresIcon.style.display = 'none';
+    }
+  } else {
+    img.style.display = 'none';
+    placeholder.innerHTML = `🖼️ Изображение ${type.toLowerCase()}`;
+    placeholder.style.display = 'block';
+    featuresIcon.style.display = 'none';
+  }
+}
+
+function renderRooms() {
+  const count = parseInt(document.getElementById('roomCount').value) || 2;
+  const container = document.getElementById('apartment');
+  container.innerHTML = '';
+  for(let key in roomsData) delete roomsData[key];
+  updateCalcButtonState();
+  for (let i = 1; i <= 5; i++) {
+    const room = document.createElement('div');
+    let className = 'room';
+    if (i > count) className += ' inactive';
+    room.className = className;
+    room.textContent = `Комната ${i}`;
+    if (i <= count) room.onclick = () => selectRoom(i);
+    container.appendChild(room);
+  }
+  if(count >= 1) selectRoom(1);
+}
+
+function selectRoom(num) {
+  currentRoom = num;
+  document.getElementById('currentRoomNum').textContent = num;
+  document.getElementById('roomInputs').classList.add('active');
+  updateDropdownsForBrand();
+  if (roomsData[num]) {
+    const d = roomsData[num];
+    document.getElementById('unitType').value = d.unitType;
+    updateLinesForType(d.unitType);
+    document.getElementById('unitLine').value = d.unitLine;
+    document.getElementById('area').value = d.area;
+    document.getElementById('height').value = d.height;
+    document.getElementById('insolation').value = d.insolation;
+    document.getElementById('peopleType').value = d.peopleType;
+    document.getElementById('peopleCount').value = d.peopleCount;
+    document.getElementById('equipType').value = d.equipType;
+    document.getElementById('equipCount').value = d.equipCount;
+    document.getElementById('margin').value = d.margin ?? 20;
+  } else {
+    document.getElementById('area').value = 15;
+    document.getElementById('height').value = 2.7;
+    document.getElementById('peopleCount').value = 1;
+    document.getElementById('equipCount').value = 1;
+    document.getElementById('margin').value = 0;
+  }
+  toggleSeriesField();
+  document.querySelectorAll('.room').forEach((el, idx) => {
+    el.classList.toggle('active', idx + 1 === num);
+  });
+}
+
+function saveRoomData() {
+  const area = parseFloat(document.getElementById('area').value);
+  const height = parseFloat(document.getElementById('height').value);
+  const insolation = parseFloat(document.getElementById('insolation').value);
+  const peopleCount = parseInt(document.getElementById('peopleCount').value);
+  const equipCount = parseInt(document.getElementById('equipCount').value);
+  const margin = parseInt(document.getElementById('margin').value);
+  const unitType = document.getElementById('unitType').value;
+  const unitLine = document.getElementById('unitLine').value;
+  
+  if (!area || area <= 0) {
+    alert('Укажите площадь комнаты');
+    document.getElementById('area').focus();
+    return;
+  }
+  
+  if (!height || height <= 0) {
+    alert('Укажите высоту потолка');
+    document.getElementById('height').focus();
+    return;
+  }
+  
+  if (!insolation || insolation <= 0) {
+    alert('Укажите уровень инсоляции');
+    return;
+  }
+  
+  if (!unitType) {
+    alert('Выберите тип блока');
+    return;
+  }
+  
+  if (unitType === 'Настенный' && !unitLine) {
+    alert('Выберите линейку блока');
+    return;
+  }
+
+  if (!currentRoom) return;
+  
+  const finalUnitLine = (document.getElementById('seriesRow').classList.contains('hidden')) 
+    ? null 
+    : unitLine;
+  
+  roomsData[currentRoom] = {
+    unitType: unitType,
+    unitLine: finalUnitLine === "null" || finalUnitLine === "Стандарт" ? null : finalUnitLine,
+    area: area,
+    height: height || 2.7,
+    insolation: insolation,
+    peopleType: parseInt(document.getElementById('peopleType').value),
+    peopleCount: peopleCount || 0,
+    equipType: parseInt(document.getElementById('equipType').value),
+    equipCount: equipCount || 0,
+    margin: isNaN(margin) ? 0 : margin
+  };
+  updateRoomGrid();
+  updateCalcButtonState();
+  const total = parseInt(document.getElementById('roomCount').value);
+  let next = null;
+  for (let i = 1; i <= total; i++) {
+    if (!roomsData[i]) { next = i; break; }
+  }
+  if (next) {
+    setTimeout(() => selectRoom(next), 300);
+  } else {
+    document.getElementById('roomInputs').classList.remove('active');
+    document.getElementById('calcBtn').scrollIntoView({behavior: "smooth"});
+  }
+}
+
+function updateRoomGrid() {
+  document.querySelectorAll('.room').forEach((el, idx) => {
+    const roomNum = idx + 1;
+    if (roomsData[roomNum]) el.classList.add('filled');
+    else el.classList.remove('filled');
+  });
+}
+
+function updateCalcButtonState() {
+  const total = parseInt(document.getElementById('roomCount').value) || 2;
+  const btn = document.getElementById('calcBtn');
+  let allFilled = true;
+  let emptyCount = 0;
+  for (let i = 1; i <= total; i++) {
+    if (!roomsData[i]) { allFilled = false; emptyCount++; }
+  }
+  if (allFilled && total > 0 && Object.keys(roomsData).length > 0) {
+    btn.classList.remove('waiting');
+    btn.classList.add('ready');
+    btn.textContent = `Рассчитать систему`;
+  } else {
+    btn.classList.add('waiting');
+    btn.classList.remove('ready');
+    btn.textContent = `Заполните комнаты (осталось ${emptyCount})`;
+  }
+}
+
+function calcRoomLoad(data) {
+  const V = data.area * data.height;
+  const Q_ins = V * data.insolation;
+  const Q_people = data.peopleCount * data.peopleType;
+  const Q_equip = data.equipCount * data.equipType;
+  return Q_ins + Q_people + Q_equip;
+}
+
+function selectIndoorUnit(requiredKW, type, line) {
+  // 1. Ищем точное совпадение по типу и линейке
+  if (type === 'Настенный' && line) {
+    const exactMatch = database.indoor.filter(u => u.type === type && u.line === line);
+    for (let unit of exactMatch) {
+      if (unit.power >= requiredKW) return unit;
+    }
+    // Если не нашли в выбранной линейке — возвращаем null
+    return null;
+  }
+  
+  // 2. Для кассетных/канальных/консольных ищем по типу
+  const typeMatch = database.indoor.filter(u => u.type === type);
+  for (let unit of typeMatch) {
+    if (unit.power >= requiredKW) return unit;
+  }
+  
+  return null;
+}
+function selectOutdoorUnit(requiredPower, roomCount, indoorUnits) {
+  const sorted = [...database.outdoor].sort((a, b) => a.power - b.power);
+  
+  for (let m of sorted) {
+    const fitsRooms = (roomCount >= m.minRooms && roomCount <= m.maxRooms);
+    const fitsPower = (m.power >= requiredPower);
+    const isCompatible = checkCompatibility(currentBrand, m.model, indoorUnits);
+    
+    if (fitsRooms && fitsPower && isCompatible) {
+      return { unit: m, error: null }; // Возвращаем объект с блоком и без ошибки
+    }
+  }
+  
+  // Если ничего не подошло
+  return { 
+    unit: null, 
+    error: `❌ Не найдено подходящего наружного блока для данной комбинации внутренних блоков.\n\nКоличество комнат: ${roomCount}\nПроверьте таблицу совместимости производителя.` 
+  };
+}
+
+function calculateSystem() {
+
+  const totalRooms = parseInt(document.getElementById('roomCount').value);
+
+// === ВАЛИДАЦИЯ ПЕРЕД РАСЧЁТОМ ===
+for (let i = 1; i <= totalRooms; i++) {
+  const d = roomsData[i];
+  
+  if (!d.area || d.area <= 0) {
+    alert(`⚠️ Комната ${i}: не указана площадь`);
+    selectRoom(i);
+    return;
+  }
+  
+  if (!d.height || d.height <= 0) {
+    alert(`⚠️ Комната ${i}: не указана высота потолка`);
+    selectRoom(i);
+    return;
+  }
+  
+  if (!d.unitType) {
+    alert(`⚠️ Комната ${i}: не выбран тип блока`);
+    selectRoom(i);
+    return;
+  }
+  
+  if (d.unitType === 'Настенный' && !d.unitLine) {
+    alert(`⚠️ Комната ${i}: не выбрана линейка блока`);
+    selectRoom(i);
+    return;
+  }
+  
+  if (!d.insolation || d.insolation <= 0) {
+    alert(`⚠️ Комната ${i}: не указана инсоляция`);
+    selectRoom(i);
+    return;
+  }
+}
+
+const btn = document.getElementById('calcBtn');
+if (btn.classList.contains('waiting')) {
+  let missing = [];
+  for(let i=1; i<=totalRooms; i++) if(!roomsData[i]) missing.push(i);
+  alert(`⚠️ Вы заполнили не все комнаты. Введите данные для: ${missing.join(', ')}`);
+  return;
+}
+  
+  const diversity = parseInt(document.getElementById('diversityFactor').value) / 100;
+  let totalLoadW = 0;
+  let sumIndoorPower = 0;
+  const indoorUnits = [];
+  
+  let hasError = false;
+  let errorMessage = '';
+  
+  for (let i = 1; i <= totalRooms; i++) {
+    const d = roomsData[i];
+    const qRaw = calcRoomLoad(d);
+    totalLoadW += qRaw;
+    
+    const margin = d.margin / 100;
+    const requiredKW = qRaw * (1 + margin) / 1000;
+    const selectedUnit = selectIndoorUnit(requiredKW, d.unitType, d.unitLine);
+    
+    // Проверяем, нашли ли блок
+    if (!selectedUnit) {
+      hasError = true;
+      const lineName = d.unitLine || d.unitType;
+      errorMessage += `• Комната ${i}: в линейке "${lineName}" нет блока мощностью ${requiredKW.toFixed(2)} кВт\n`;
+      continue; // Пропускаем эту комнату
+    }
+    
+    sumIndoorPower += selectedUnit.power;
+    
+    indoorUnits.push({ 
+      room: i, 
+      loadW: qRaw, 
+      margin: d.margin, 
+      requiredKW: requiredKW,
+      selectedUnit: selectedUnit,
+      type: d.unitType,
+      line: d.unitLine,
+      power: selectedUnit.power
+    });
+  }
+  
+// Если есть ошибки — показываем и прерываем расчёт
+if (hasError) {
+  alert(`⚠️ Не удалось подобрать блоки для следующих комнат:\n\n${errorMessage}\nУменьшите площадь/нагрузку или выберите другую линейку.`);
+  return;
+}
+
+const requiredOutdoorPower = sumIndoorPower / diversity;
+const result = selectOutdoorUnit(requiredOutdoorPower, totalRooms, indoorUnits);
+
+// ПРОВЕРКА НА ОШИБКУ
+if (result.error) {
+  alert(result.error);
+  return;
+}
+  
+  const outdoorUnit = result.unit;
+  
+  let totalPrice = 0;
+  let tableHTML = `
+    <div style="overflow-x: auto;">
+    <table class="result-table">
+      <thead>
+        <tr>
+          <th>Комната</th>
+          <th>Площадь, м²</th>
+          <th>Тип / Линейка</th>
+          <th>Запас, %</th>
+          <th>Требуемая мощность</th>
+          <th>Номинальная мощность</th>
+          <th>Внутренний блок</th>
+          <th>HC-код</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  
+  indoorUnits.forEach(u => {
+    const typeBadge = `<span class="badge badge-type">${u.type}</span>`;
+    const lineBadge = u.line ? `<span class="badge badge-line">${u.line}</span>` : '';
+    const price = getPrice(u.selectedUnit.hcCode);
+    totalPrice += price;
+    
+   tableHTML += `
+     <tr>
+       <td><strong>${u.room}</strong></td>
+       <td>${roomsData[u.room].area}</td>
+       <td>${typeBadge}${lineBadge}</td>
+       <td>${u.margin}%</td>
+       <td>${u.requiredKW.toFixed(2)} кВт</td>
+       <td style="font-weight: 600; color: var(--brand-color);">${u.selectedUnit.power} кВт</td>
+       <td>${u.selectedUnit.model}</td>
+       <td><span class="hc-code">${u.selectedUnit.hcCode}</span></td>
+     </tr>
+   `;
+  });
+  tableHTML += `</tbody></table></div>`;
+
+  // === ТАБЛИЦА ДЛЯ НАРУЖНОГО БЛОКА ===
+  const loadPercent = ((sumIndoorPower / outdoorUnit.power) * 100).toFixed(1);
+  let loadStatus = "";
+  let loadColor = "var(--brand-color)";
+  
+  if (loadPercent < 50) {
+    loadStatus = "⚠️ Низкая загрузка (неэффективно)";
+    loadColor = "#e67e22";
+  } else if (loadPercent >= 130) {
+    loadStatus = "⚠️ Перегрузка блока!";
+    loadColor = "#c0392b";
+  }
+
+  // Получаем цену и артикул наружного блока
+  const outdoorPrice = getPrice(outdoorUnit.hcCode);
+  const outdoorArticle = getArticle(outdoorUnit.hcCode);
+  
+  // Добавляем цену наружного блока к общей сумме
+  const finalTotalPrice = totalPrice + outdoorPrice;
+  
+  // === ТАБЛИЦА НАРУЖНОГО БЛОКА ===
+  tableHTML += `
+    <h4 style="margin: 25px 0 15px; color: var(--brand-color); font-weight: 600;">
+      Рекомендованный наружный блок
+    </h4>
+    <div style="overflow-x: auto;">
+    <table class="result-table" style="width: 100%; min-width: 850px;">
+      <thead>
+        <tr>
+<th style="width: 35%;">Модель</th>
+<th style="width: 18%;">HC-код</th>
+<th style="width: 18%;">Номинальная мощность</th>
+<th style="width: 18%;">Требуемая мощность</th>
+<th style="width: 11%;">Загрузка блока</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="white-space: normal; padding: 12px;">
+            <strong>${outdoorUnit.model}</strong>
+          </td>
+          <td style="white-space: nowrap; padding: 12px;">
+            <span class="hc-code">${outdoorUnit.hcCode}</span>
+          </td>
+          <td style="padding: 12px;">${outdoorUnit.power} кВт</td>
+          <td style="padding: 12px;">${requiredOutdoorPower.toFixed(2)} кВт</td>
+          <td style="padding: 12px;">
+            <span style="font-weight: bold; color: ${loadColor}; font-size: 16px;">
+              ${loadPercent}%
+            </span>
+            ${loadStatus ? `<div style="font-size: 12px; color: #666; margin-top: 4px;">${loadStatus}</div>` : ''}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  `;
+  
+  // Сохраняем результаты для спецификации
+  // Добавляем таблицу технических характеристик
+  tableHTML += getOutdoorSpecsHTML(outdoorUnit);
+  calculationResults = {
+    indoorUnits: indoorUnits,
+    outdoorUnit: outdoorUnit,
+    roomsData: roomsData
+  };
+  
+  // Показываем блок спецификации
+  document.getElementById('specificationBlock').style.display = 'block';
+  document.getElementById('summary').innerHTML = tableHTML;
+  document.getElementById('result').classList.add('active');
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+
+  saveToHistory();
+}
+
+initBrandTabs();
+switchBrand('ballu-free');
+updateDropdownsForBrand();
+renderRooms();
+updateBrandLogo();
+loadPricesFromStorage();
+
+// === ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ ХРАНЕНИЯ РЕЗУЛЬТАТОВ ===
+let calculationResults = {
+  indoorUnits: [],
+  outdoorUnit: null,
+  roomsData: {}
+};
+
+// === ФУНКЦИЯ ГЕНЕРАЦИИ СПЕЦИФИКАЦИИ ===
+function generateSpecification() {
+  const tableContainer = document.getElementById('specificationTable');
+  
+let html = `
+  <div style="width: 100%; overflow-x: visible;">
+  <table class="spec-table" style="width: 100% !important; table-layout: fixed !important; border-collapse: collapse;">
+  <colgroup>
+    <col style="width: 5%">
+    <col style="width: 40%">
+    <col style="width: 18%">
+    <col style="width: 12%">
+    <col style="width: 25%">
+  </colgroup>
+`;
+
+html += `
+  <thead>
+    <tr>
+      <th class="number" style="color: white; text-align: center;">№</th>
+      <th style="color: white;">Наименование товара</th>
+      <th class="price" style="color: white; text-align: right;">Цена, шт./руб.</th>
+      <th class="qty" style="color: white; text-align: center;">Кол-во, шт.</th>
+      <th class="total" style="color: white; text-align: right;">Итого, руб.</th>
+    </tr>
+  </thead>
+`;
+  
+  let totalSum = 0;
+  let lineNumber = 1;
+  
+  // Внутренние блоки
+  const indoorGroups = {};
+  calculationResults.indoorUnits.forEach(unit => {
+    const key = unit.selectedUnit.model;
+    if (!indoorGroups[key]) {
+      indoorGroups[key] = {
+        model: unit.selectedUnit.model,
+        hcCode: unit.selectedUnit.hcCode,
+        price: getPrice(unit.selectedUnit.hcCode),
+        count: 0
+      };
+    }
+    indoorGroups[key].count++;
+  });
+  
+  for (const [model, data] of Object.entries(indoorGroups)) {
+    const itemTotal = data.price * data.count;
+    totalSum += itemTotal;
+    
+    html += `
+      <tr>
+        <td class="number">${lineNumber}</td>
+        <td class="name">
+          <strong>${data.model}</strong><br>
+          <small style="color: #7f8c8d;">HC-код: ${data.hcCode}</small>
+        </td>
+        <td class="price">${data.price > 0 ? data.price.toLocaleString('ru-RU') : '—'}</td>
+        <td class="qty">${data.count}</td>
+        <td class="total">${itemTotal > 0 ? itemTotal.toLocaleString('ru-RU') : '—'}</td>
+      </tr>
+    `;
+    lineNumber++;
+  }
+  
+  // Наружный блок
+  if (calculationResults.outdoorUnit) {
+    const outdoorPrice = getPrice(calculationResults.outdoorUnit.hcCode);
+    const outdoorTotal = outdoorPrice;
+    totalSum += outdoorTotal;
+    
+    html += `
+      <tr>
+        <td class="number">${lineNumber}</td>
+        <td class="name">
+          <strong>${calculationResults.outdoorUnit.model}</strong><br>
+          <small style="color: #7f8c8d;">HC-код: ${calculationResults.outdoorUnit.hcCode}</small>
+        </td>
+        <td class="price">${outdoorPrice > 0 ? outdoorPrice.toLocaleString('ru-RU') : '—'}</td>
+        <td class="qty">1</td>
+        <td class="total">${outdoorTotal > 0 ? outdoorTotal.toLocaleString('ru-RU') : '—'}</td>
+      </tr>
+    `;
+  }
+  
+   html += '</tbody></table></div>';
+  
+  // Итоги
+  const vat = totalSum * 0.20; // НДС 20%
+  
+html += `
+  <div class="spec-summary">
+    <div class="spec-summary-row total-sum">
+      <span>Итого к оплате:</span>
+      <span>${totalSum.toLocaleString('ru-RU')} ₽</span>
+    </div>
+    <div class="spec-summary-row vat">
+      <span>в т. ч. НДС (20%):</span>
+      <span>${vat.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ₽</span>
+    </div>
+<div class="spec-summary-row info">
+  <span>Дата формирования: ${new Date().toLocaleDateString('ru-RU')}</span>
+</div>
+  </div>
+`;
+  
+  tableContainer.innerHTML = html;
+  tableContainer.style.display = 'block';
+  
+  // Показываем кнопку экспорта в PDF
+  const exportBtn = document.getElementById('exportPdfBtn');
+  if (exportBtn) {
+    exportBtn.style.display = 'inline-block';
+  }
+}
+
+// === ФУНКЦИЯ ЭКСПОРТА В PDF ===
+function exportToPDF() {  
+  // Показываем спецификацию если ещё не показана
+  const specTable = document.getElementById('specificationTable');
+  if (specTable && specTable.style.display === 'none') {
+    generateSpecification();
+  }
+  
+  // Прокручиваем к результатам
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+  
+  // Запускаем печать через 500мс (чтобы пользователь увидел результат)
+  setTimeout(() => {
+    window.print();
+  }, 500);
+}
+
+// === ФУНКЦИЯ ПЕЧАТИ / СОХРАНЕНИЯ PDF ===
+function printSpecification() {
+  window.print();
+}
+
+
+  
+
+// === ГЕНЕРАЦИЯ ТАБЛИЦЫ ХАРАКТЕРИСТИК НАРУЖНОГО БЛОКА ===
+function getOutdoorSpecsHTML(unit) {
+  // Если реальных данных ещё нет, используем заглушку (потом заменим на ваши данные)
+  const s = unit.specs || {
+    cooling: "4.1", heating: "4.5", efficiency: "A++/A+", noise: "52",
+    dimensions: "720×550×285", weight: "28", pipeLenSingle: "15",
+    pipeLenTotal: "25", heightDiff: "5", refrigerant: "R32",
+    tempCool: "-15...+46", tempHeat: "-15...+24"
+  };
+
+  return `
+    <h4 style="margin: 35px 0 15px; color: var(--brand-color); font-weight: 600; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+      Технические характеристики наружного блока
+    </h4>
+    <table class="outdoor-specs-table">
+      <tbody>
+        <tr><th>Производительность охлаждения</th><td>${s.cooling} кВт</td></tr>
+        <tr><th>Производительность обогрева</th><td>${s.heating} кВт</td></tr>
+        <tr><th>Класс энергоэффективности</th><td>${s.efficiency}</td></tr>
+        <tr><th>Уровень шума</th><td>${s.noise} дБ</td></tr>
+        <tr><th>Размеры внешнего блока (Ш×В×Г)</th><td>${s.dimensions} мм</td></tr>
+        <tr><th>Вес нетто</th><td>${s.weight} кг</td></tr>
+        <tr><th>Макс. длина трассы (до 1 блока)</th><td>${s.pipeLenSingle} м</td></tr>
+        <tr><th>Макс. длина трассы (общая)</th><td>${s.pipeLenTotal} м</td></tr>
+        <tr><th>Максимальный перепад высот</th><td>${s.heightDiff} м</td></tr>
+        <tr><th>Хладагент</th><td>${s.refrigerant} г</td></tr>
+        <tr><th>Рабочая температура (охлаждение)</th><td>${s.tempCool} °C</td></tr>
+        <tr><th>Рабочая температура (обогрев)</th><td>${s.tempHeat} °C</td></tr>
+      </tbody>
+    </table>
+  `;
+}
+
+
+// === СОХРАНЕНИЕ ИСТОРИИ РАСЧЁТОВ ===
+const HISTORY_KEY = 'hvac_calc_history';
+const MAX_HISTORY = 20; // Максимальное количество записей
+
+// Функция сохранения расчёта
+// Функция сохранения расчёта
+function saveToHistory() {
+  if (!calculationResults || !calculationResults.outdoorUnit) {
+    return; // Нечего сохранять
+  }
+
+  const historyItem = {
+    id: Date.now(),
+    date: new Date().toLocaleString('ru-RU'),
+    brand: currentBrand,
+    brandName: brands[currentBrand].name,
+    roomsCount: Object.keys(calculationResults.roomsData).length,
+    // Сохраняем ВСЕ данные для восстановления
+    roomsData: calculationResults.roomsData,
+    indoorUnits: calculationResults.indoorUnits.map(u => ({
+      model: u.selectedUnit.model,
+      hcCode: u.selectedUnit.hcCode,
+      power: u.power,
+      type: u.type,
+      line: u.line,
+      room: u.room,
+      loadW: u.loadW,
+      margin: u.margin,
+      requiredKW: u.requiredKW
+    })),
+    outdoorUnit: {
+      model: calculationResults.outdoorUnit.model,
+      hcCode: calculationResults.outdoorUnit.hcCode,
+      power: calculationResults.outdoorUnit.power,
+      minRooms: calculationResults.outdoorUnit.minRooms,
+      maxRooms: calculationResults.outdoorUnit.maxRooms,
+      specs: calculationResults.outdoorUnit.specs
+    },
+    loadPercent: ((calculationResults.indoorUnits.reduce((sum, u) => sum + u.power, 0) / calculationResults.outdoorUnit.power) * 100).toFixed(1),
+    totalPrice: calculationResults.indoorUnits.reduce((sum, u) => sum + getPrice(u.selectedUnit.hcCode), 0) + getPrice(calculationResults.outdoorUnit.hcCode)
+  };
+
+  // Загружаем существующую историю
+  let history = getHistory();
+  
+  // Добавляем в начало
+  history.unshift(historyItem);
+  
+  // Ограничиваем количество
+  if (history.length > MAX_HISTORY) {
+    history = history.slice(0, MAX_HISTORY);
+  }
+  
+  // Сохраняем
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  
+  console.log('✅ Расчёт сохранён в историю');
+}
+
+// Получить всю историю
+function getHistory() {
+  const data = localStorage.getItem(HISTORY_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+// Показать/скрыть панель истории
+function toggleHistoryPanel() {
+  const panel = document.getElementById('historyPanel');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    renderHistory();
+    panel.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+// Отрисовать список истории
+function renderHistory() {
+  const history = getHistory();
+  const listEl = document.getElementById('historyList');
+  const emptyEl = document.getElementById('historyEmpty');
+  
+  if (history.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  
+  emptyEl.style.display = 'none';
+  
+  listEl.innerHTML = history.map(item => `
+    <div class="history-item">
+      <div class="history-info" onclick="loadFromHistory(${item.id})">
+        <div class="history-title">
+          ${item.brandName} • ${item.roomsCount} комн.
+          <span style="color: #27ae60; font-weight: 600;">${item.totalPrice > 0 ? item.totalPrice.toLocaleString('ru-RU') + ' ₽' : '—'}</span>
+        </div>
+        <div class="history-details">
+          📅 ${item.date} | Наружный: ${item.outdoorUnit.model} | Загрузка: ${item.loadPercent}%
+        </div>
+      </div>
+      <div class="history-actions">
+        <button class="history-btn history-btn-load" onclick="loadFromHistory(${item.id})">Загрузить</button>
+        <button class="history-btn history-btn-delete" onclick="deleteFromHistory(${item.id})">Удалить</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Загрузить расчёт из истории
+// Загрузить расчёт из истории
+function loadFromHistory(id) {
+  const history = getHistory();
+  const item = history.find(h => h.id === id);
+  
+  if (!item) {
+    alert('Расчёт не найден');
+    return;
+  }
+  
+  if (!confirm(`Загрузить расчёт от ${item.date}?\n\nБренд: ${item.brandName}\nКомнат: ${item.roomsCount}\n\nТекущие данные будут заменены.`)) {
+    return;
+  }
+  
+  // 1. Переключаем бренд если нужно
+  if (item.brand !== currentBrand) {
+    switchBrand(item.brand);
+  }
+  
+  // 2. Восстанавливаем данные комнат
+  if (item.roomsData) {
+    // Очищаем текущие данные
+    for (let key in roomsData) {
+      delete roomsData[key];
+    }
+    
+    // Восстанавливаем из истории
+    Object.assign(roomsData, item.roomsData);
+    
+    // Обновляем сетку комнат
+    updateRoomGrid();
+    
+    // Обновляем количество комнат в UI
+    const roomCount = Object.keys(item.roomsData).length;
+    document.getElementById('roomCount').value = roomCount;
+    renderRooms();
+  }
+  
+  // 3. Восстанавливаем результаты расчёта
+  calculationResults = {
+    indoorUnits: item.indoorUnits.map(u => ({
+      room: u.room,
+      loadW: u.loadW,
+      margin: u.margin,
+      requiredKW: u.requiredKW,
+      selectedUnit: {
+        model: u.model,
+        hcCode: u.hcCode,
+        power: u.power,
+        type: u.type,
+        line: u.line
+      },
+      type: u.type,
+      line: u.line,
+      power: u.power
+    })),
+    outdoorUnit: item.outdoorUnit,
+    roomsData: item.roomsData
+  };
+  
+  // 4. Показываем результаты
+  document.getElementById('result').classList.add('active');
+  
+  // 5. Генерируем таблицы результатов
+  let totalPrice = 0;
+  let tableHTML = `
+    <table class="result-table">
+      <thead>
+        <tr>
+          <th>Комната</th>
+          <th>Площадь, м²</th>
+          <th>Тип / Линейка</th>
+          <th>Номинальная мощность</th>
+          <th>Требуемая мощность</th>
+          <th>Внутренний блок</th>
+          <th>HC-код</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  
+  calculationResults.indoorUnits.forEach(u => {
+    const typeBadge = `<span class="badge badge-type">${u.type}</span>`;
+    const lineBadge = u.line ? `<span class="badge badge-line">${u.line}</span>` : '';
+    const price = getPrice(u.selectedUnit.hcCode);
+    totalPrice += price;
+    
+    const roomData = calculationResults.roomsData[u.room] || {};
+    
+  tableHTML += `
+    <tr>
+      <td><strong>${u.room}</strong></td>
+      <td>${roomData.area || '—'}</td>
+      <td>${typeBadge}${lineBadge}</td>
+      <td style="font-weight: 600; color: var(--brand-color);">${u.power} кВт</td>
+      <td>${u.requiredKW.toFixed(2)} кВт</td>
+      <td>${u.selectedUnit.model}</td>
+      <td><span class="hc-code">${u.selectedUnit.hcCode}</span></td>
+    </tr>
+  `;
+  });
+  tableHTML += `</tbody></table>`;
+
+  // Таблица для наружного блока
+  const loadPercent = item.loadPercent;
+  let loadStatus = "";
+  let loadColor = "var(--brand-color)";
+  
+  if (loadPercent < 50) {
+    loadStatus = "⚠️ Низкая загрузка (неэффективно)";
+    loadColor = "#e67e22";
+  } else if (loadPercent >= 130) {
+    loadStatus = "⚠️ Перегрузка блока!";
+    loadColor = "#c0392b";
+  }
+
+  const outdoorPrice = getPrice(item.outdoorUnit.hcCode);
+  const finalTotalPrice = totalPrice + outdoorPrice;
+  
+  tableHTML += `
+    <h4 style="margin: 25px 0 15px; color: var(--brand-color); font-weight: 600;">
+      Рекомендованный наружный блок
+    </h4>
+    <div style="overflow-x: auto;">
+    <table class="result-table" style="width: 100%; min-width: 850px;">
+      <thead>
+        <tr>
+          <th style="width: 35%;">Модель</th>
+          <th style="width: 18%;">HC-код</th>
+          <th style="width: 18%;">Номинальная мощность</th>
+          <th style="width: 18%;">Требуемая мощность</th>
+          <th style="width: 11%;">Загрузка блока</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="white-space: normal; padding: 12px;">
+            <strong>${item.outdoorUnit.model}</strong>
+          </td>
+          <td style="white-space: nowrap; padding: 12px;">
+            <span class="hc-code">${item.outdoorUnit.hcCode}</span>
+          </td>
+          <td style="padding: 12px;">${item.outdoorUnit.power} кВт</td>
+          <td style="padding: 12px;">${(item.outdoorUnit.power * loadPercent / 100).toFixed(2)} кВт</td>
+          <td style="padding: 12px;">
+            <span style="font-weight: bold; color: ${loadColor}; font-size: 16px;">
+              ${loadPercent}%
+            </span>
+            ${loadStatus ? `<div style="font-size: 12px; color: #666; margin-top: 4px;">${loadStatus}</div>` : ''}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  `;
+  
+  // Добавляем таблицу технических характеристик
+  tableHTML += getOutdoorSpecsHTML(item.outdoorUnit);
+  
+  document.getElementById('summary').innerHTML = tableHTML;
+  
+  // 6. Показываем блок спецификации
+  document.getElementById('specificationBlock').style.display = 'block';
+  
+  // 7. Автоматически генерируем спецификацию
+  generateSpecification();
+  
+  // 8. Прокручиваем к результатам
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+  
+  // 9. Закрываем панель истории
+  document.getElementById('historyPanel').style.display = 'none';
+  
+  // 10. Обновляем кнопку расчёта
+  updateCalcButtonState();
+  
+  console.log('✅ Расчёт загружен из истории');
+}
+
+// Удалить один расчёт
+function deleteFromHistory(id) {
+  if (!confirm('Удалить этот расчёт из истории?')) {
+    return;
+  }
+  
+  let history = getHistory();
+  history = history.filter(h => h.id !== id);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  renderHistory();
+}
+
+// Очистить всю историю
+function clearAllHistory() {
+  if (!confirm('Удалить ВСЕ расчёты из истории?')) {
+    return;
+  }
+  
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+}
+
+
+</script>
+
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=109929695', 'ym');
+
+    ym(109929695, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/109929695" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+</body>
+</html>
